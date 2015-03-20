@@ -1,6 +1,6 @@
 package Millc::Lex;
 use Exporter 'import';
-use List::Util qw(min);
+use List::Util 'min';
 use Modern::Perl;
 
 our @EXPORT_OK = qw(lex);
