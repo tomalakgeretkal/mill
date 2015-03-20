@@ -49,7 +49,7 @@ sub many {
 
 sub one_of {
     for (@_) {
-        my $result = eval { try sub { $_->() } };
+        my $result = eval { try $_ };
         if (!$@) {
             return $result;
         }
