@@ -6,6 +6,7 @@ sub new {
     bless {
         strings => [],
         dependencies => [],
+        subroutines => [],
     };
 }
 
@@ -14,10 +15,17 @@ sub string {
 }
 
 sub dependency {
-    my $self = shift;
-    my $module = join('::', @{shift()});
-    my $id = $self->string($module);
-    push @{$self->{dependencies}}, $id;
+    my ($self, $module) = @_;
+    push @{$self->{dependencies}}, $self->string($module);
+}
+
+sub subroutine {
+    my ($self, $name, $parameter_count, $body) = @_;
+    push @{$self->{subroutines}}, {
+        name => $self->string($name),
+        parameter_count => $parameter_count,
+        body => $body,
+    };
 }
 
 sub write {
@@ -34,7 +42,15 @@ sub write {
 
     print $fh pack('L<', scalar @{$self->{dependencies}});
     for (@{$self->{dependencies}}) {
-        printf $fh pack('L<', $_);
+        print $fh pack('L<', $_);
+    }
+
+    print $fh pack('L<', scalar @{$self->{subroutines}});
+    for (@{$self->{subroutines}}) {
+        print $fh pack('L<', $_->{name});
+        print $fh pack('L<', $_->{parameter_count});
+        print $fh pack('L<', length $_->{body});
+        print $fh $_->{body};
     }
 }
 
