@@ -1,0 +1,21 @@
+#!/usr/bin/env perl
+use File::Slurp;
+use Millc::BytecodeBuilder;
+use Millc::Codegen 'codegen';
+use Millc::Lex 'lex';
+use Millc::Name 'resolve';
+use Millc::ObjectBuilder;
+use Millc::Parse 'parse';
+use Modern::Perl;
+
+if (@ARGV != 2) {
+    print STDERR "usage: millc hello.mill hello.millo";
+    exit 1;
+}
+
+my $code = read_file($ARGV[0]);
+my $module = resolve(parse([lex($code)]));
+my $object_builder = Millc::ObjectBuilder->new();
+codegen($object_builder, 'Millc::BytecodeBuilder', $module);
+open my $object_fh, '>', $ARGV[1];
+$object_builder->write($object_fh);
