@@ -12,6 +12,7 @@ $builder->push_module_member(0);
 $builder->push_string(1);
 $builder->call(1);
 $builder->pop();
+$builder->push_unit();
 $builder->return();
 
 eq_or_diff(
@@ -20,5 +21,6 @@ eq_or_diff(
     "\x02\x01\x00\x00\x00" .
     "\x03\x01\x00\x00\x00" .
     "\x04" .
+    "\x06" .
     "\x05"
 );

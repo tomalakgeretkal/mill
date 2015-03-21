@@ -43,10 +43,11 @@ eq_or_diff(
     "\x01\x00\x00\x00" . # subroutine count
     "\x03\x00\x00\x00" . # MAIN
     "\x00\x00\x00\x00" . # parameter count
-    "\x11\x00\x00\x00" . # body length
+    "\x12\x00\x00\x00" . # body length
     "\x01\x01\x00\x00\x00" . # push std::io::writeln
     "\x02\x02\x00\x00\x00" . # push "Hello, world!"
     "\x03\x01\x00\x00\x00" . # call
     "\x04" . # pop
+    "\x06" . # push unit
     "\x05" # return
 );

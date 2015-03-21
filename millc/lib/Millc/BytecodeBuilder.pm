@@ -35,4 +35,9 @@ sub return {
     print $fh "\x05";
 }
 
+sub push_unit {
+    my $fh = shift->{fh};
+    print $fh "\x06";
+}
+
 1;
