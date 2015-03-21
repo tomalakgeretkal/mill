@@ -64,8 +64,8 @@ namespace mill {
             subroutine.body.resize(bodyLength);
             baka::io::read_full(
                 reader,
-                (char *)subroutine.body.data(),
-                (char *)subroutine.body.data() + subroutine.body.size()
+                (char*)subroutine.body.data(),
+                (char*)subroutine.body.data() + subroutine.body.size()
             );
         }
 

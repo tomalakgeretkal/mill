@@ -31,7 +31,7 @@ TEST_CASE("readObject", "[object_file]") {
         0x04,
         0x05,
     };
-    pair.second.write((char *)data.data(), (char *)data.data() + data.size());
+    pair.second.write((char*)data.data(), (char*)data.data() + data.size());
 
     auto object = mill::readObject(pair.first);
     REQUIRE(object.strings == (std::vector<std::string>{"std::io", "std::io::writeln", "Hello, world!", "MAIN"}));
