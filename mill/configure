@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+from glob import glob
+import os
+import sys; sys.path.append('tools')
+
+from ninja_syntax import Writer
+
+w = Writer(open('build.ninja', 'w'))
+
+w.variable('builddir', 'build')
+
+w.variable('cxx', os.environ.get('CXX', 'clang++'))
+w.variable('ld', '$cxx')
+
+w.variable('cxxflags', os.environ.get('CXXFLAGS', '') + '''
+    -std=c++1y
+    -Wall -Wextra -Werror -pedantic
+    -I ~/Catch/include
+    -I ~/baka/include
+'''.replace('\n', ' '))
+w.variable('ldflags', '')
+
+w.rule('cxx', '$cxx $cxxflags -MMD -MF $out.d -c -o $out $in', depfile='$out.d')
+w.rule('ld', '$ld $ldflags -o $out $in')
+w.rule('instructions', 'tools/instructions.awk $in > $out')
+
+w.build('$builddir/instructions.hpp', 'instructions', ['src/instructions.txt'])
+
+targets = {'src': [], 'test': []}
+for kind, source_file in [('src', f) for f in glob('src/*.cpp')] + [('test', f) for f in glob('test/*.cpp')]:
+    target = '$builddir/' + source_file.replace('.cpp', '.o')
+    targets[kind].append(target)
+    w.build(target, 'cxx', [source_file])
+
+for target in targets:
+    if targets[target]:
+        w.build('$builddir/' + target + '.out', 'ld', targets[target])
