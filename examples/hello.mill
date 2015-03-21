@@ -1,0 +1,5 @@
+use std::io;
+
+MAIN {
+    io::writeln("Hello, world!");
+}
