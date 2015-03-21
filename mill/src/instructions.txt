@@ -1,0 +1,10 @@
+# 0x00 is deliberately left undefined
+
+0x01 PushModuleMember uint32
+0x02 PushString uint32
+0x06 PushUnit
+
+0x04 Pop
+
+0x03 Call uint32
+0x05 Return
