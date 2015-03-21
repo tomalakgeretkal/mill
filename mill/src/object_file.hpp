@@ -13,8 +13,15 @@ namespace mill {
     BAKA_EXCEPTION(BadObject, std::runtime_error);
 
     struct Object {
+        struct Subroutine {
+            std::size_t name;
+            std::size_t parameterCount;
+            std::vector<unsigned char> body;
+        };
+
         std::vector<std::string> strings;
         std::vector<std::size_t> dependencies;
+        std::vector<Subroutine> subroutines;
     };
 
     template<typename Reader>
@@ -48,9 +55,24 @@ namespace mill {
             dependency = INT(std::uint32_t);
         }
 
+        auto subroutineCount = INT(std::uint32_t);
+        std::vector<Object::Subroutine> subroutines(subroutineCount);
+        for (auto& subroutine : subroutines) {
+            subroutine.name = INT(std::uint32_t);
+            subroutine.parameterCount = INT(std::uint32_t);
+            auto bodyLength = INT(std::uint32_t);
+            subroutine.body.resize(bodyLength);
+            baka::io::read_full(
+                reader,
+                (char *)subroutine.body.data(),
+                (char *)subroutine.body.data() + subroutine.body.size()
+            );
+        }
+
         Object object;
         object.strings = std::move(strings);
         object.dependencies = std::move(dependencies);
+        object.subroutines = std::move(subroutines);
         return object;
 
 #undef INT

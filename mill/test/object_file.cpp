@@ -31,9 +31,14 @@ TEST_CASE("readObject", "[object_file]") {
         0x04,
         0x05,
     };
-    pair.second.write((char*)data.data(), (char*)data.data() + data.size());
+    pair.second.write((char *)data.data(), (char *)data.data() + data.size());
 
     auto object = mill::readObject(pair.first);
     REQUIRE(object.strings == (std::vector<std::string>{"std::io", "std::io::writeln", "Hello, world!", "MAIN"}));
     REQUIRE(object.dependencies == (std::vector<std::size_t>{0}));
+
+    auto main = object.subroutines.at(0);
+    REQUIRE(main.name == 3);
+    REQUIRE(main.parameterCount == 0);
+    REQUIRE(main.body == std::vector<unsigned char>(data.begin() + 94, data.end()));
 }
