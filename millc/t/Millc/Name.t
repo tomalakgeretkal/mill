@@ -1,6 +1,9 @@
 #!perl -T
-use Millc::Lex qw(lex);
-use Millc::Parse qw(parse);
+use Millc::Lex 'lex';
+use Millc::Name 'resolve';
+use Millc::Parse 'parse';
+use Modern::Perl;
+use Test::Differences;
 use Test::More tests => 1;
 
 my $hello_world = <<EOC;
@@ -11,7 +14,7 @@ MAIN {
 }
 EOC
 
-is_deeply(parse([lex($hello_world)]), {
+eq_or_diff(resolve(parse([lex($hello_world)])), {
     type => 'module',
     decls => [
         { type => 'use_decl', module => ['std', 'io'] },
@@ -26,7 +29,11 @@ is_deeply(parse([lex($hello_world)]), {
                             type => 'call_expr',
                             callee => {
                                 type => 'name_expr',
-                                name => ['io', 'writeln'],
+                                name => {
+                                   type => 'module_member',
+                                   module => ['std', 'io'],
+                                   member => 'writeln',
+                               },
                             },
                             arguments => [
                                 {

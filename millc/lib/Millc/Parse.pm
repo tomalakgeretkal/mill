@@ -128,11 +128,12 @@ sub expr_stmt {
 sub parse {
     my @tokens = @{shift()};
     push @tokens, { type => 'eof' };
-    with_tokens \@tokens, sub {
+    my @decls = with_tokens \@tokens, sub {
         my $result = many(\&decl);
         expect('eof');
         @$result;
     };
+    { type => 'module', decls => \@decls },
 }
 
 1;
