@@ -4,9 +4,6 @@ use Modern::Perl;
 use Test::Differences;
 use Test::More tests => 1;
 
-my $data = '';
-open my $fh, '>:raw', \$data;
-
 my $builder = Millc::ObjectBuilder->new();
 
 $builder->dependency('std::io');
@@ -23,6 +20,8 @@ my $main_body =
 
 $builder->subroutine('MAIN', 0, $main_body);
 
+my $data = '';
+open my $fh, '>:raw', \$data;
 $builder->write($fh);
 eq_or_diff(
     $data,
