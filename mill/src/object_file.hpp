@@ -2,6 +2,7 @@
 #include <baka/binary.hpp>
 #include <baka/exception.hpp>
 #include <baka/io/util.hpp>
+#include <cstddef>
 #include <cstdint>
 #include <stdexcept>
 #include <string>
@@ -13,6 +14,7 @@ namespace mill {
 
     struct Object {
         std::vector<std::string> strings;
+        std::vector<std::size_t> dependencies;
     };
 
     template<typename Reader>
@@ -40,8 +42,15 @@ namespace mill {
             baka::io::read_full(reader, &string[0], &string[0] + string.size());
         }
 
+        auto dependencyCount = INT(std::uint32_t);
+        std::vector<std::size_t> dependencies(dependencyCount);
+        for (auto& dependency : dependencies) {
+            dependency = INT(std::uint32_t);
+        }
+
         Object object;
         object.strings = std::move(strings);
+        object.dependencies = std::move(dependencies);
         return object;
 
 #undef INT

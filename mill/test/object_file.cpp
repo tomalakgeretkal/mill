@@ -1,6 +1,7 @@
 #include "../src/object_file.hpp"
 #include <baka/io/pipe.hpp>
 #include <catch.hpp>
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -34,4 +35,5 @@ TEST_CASE("readObject", "[object_file]") {
 
     auto object = mill::readObject(pair.first);
     REQUIRE(object.strings == (std::vector<std::string>{"std::io", "std::io::writeln", "Hello, world!", "MAIN"}));
+    REQUIRE(object.dependencies == (std::vector<std::size_t>{0}));
 }
