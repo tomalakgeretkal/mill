@@ -5,11 +5,19 @@ use Set::Scalar;
 sub new {
     bless {
         strings => [],
+        dependencies => [],
     };
 }
 
 sub string {
     push(shift->{strings}, shift) - 1;
+}
+
+sub dependency {
+    my $self = shift;
+    my $module = join('::', @{shift()});
+    my $id = $self->string($module);
+    push @{$self->{dependencies}}, $id;
 }
 
 sub write {
@@ -22,6 +30,11 @@ sub write {
     for (@{$self->{strings}}) {
         print $fh pack('L<', length $_);
         print $fh $_;
+    }
+
+    print $fh pack('L<', scalar @{$self->{dependencies}});
+    for (@{$self->{dependencies}}) {
+        printf $fh pack('L<', $_);
     }
 }
 
