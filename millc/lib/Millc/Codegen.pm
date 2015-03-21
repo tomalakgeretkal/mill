@@ -37,6 +37,7 @@ sub codegen_main_decl {
     local $bytecode_builder = $bytecode_builder_factory->new($fh);
     codegen_expr(shift->{body});
     $bytecode_builder->pop();
+    $bytecode_builder->push_unit();
     $bytecode_builder->return();
     $object_builder->subroutine('MAIN', 0, $body);
 }
