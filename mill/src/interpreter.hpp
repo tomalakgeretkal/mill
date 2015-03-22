@@ -11,7 +11,7 @@ namespace mill {
         template<typename ReaderSeeker>
         class Interpreter {
         public:
-            Interpreter(VM& vm, Object& object, ReaderSeeker& source)
+            Interpreter(VM& vm, Object const& object, ReaderSeeker& source)
                 : vm(&vm), object(&object), source(&source) { }
 
             Value* operator()() {
@@ -56,14 +56,14 @@ namespace mill {
 
         private:
             VM* vm;
-            Object* object;
+            Object const* object;
             ReaderSeeker* source;
             std::stack<Value*> stack;
         };
     }
 
     template<typename ReaderSeeker>
-    Value* interpret(VM& vm, Object& object, ReaderSeeker& source) {
+    Value* interpret(VM& vm, Object const& object, ReaderSeeker& source) {
         detail::Interpreter<ReaderSeeker> interpreter(vm, object, source);
         return interpreter();
     }
