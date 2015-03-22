@@ -50,7 +50,7 @@ TEST_CASE("interpreter works", "[Interpreter]") {
         mill::VM vm;
         std::size_t argc;
         std::vector<mill::Value*> argv;
-        vm.setGlobal("foo", vm.function([&] (std::size_t argc_, mill::Value** argv_) {
+        vm.setGlobal("foo", vm.function([&] (mill::VM&, std::size_t argc_, mill::Value** argv_) {
             argc = argc_;
             std::copy(argv_, argv_ + argc_, std::back_inserter(argv));
             return vm.unit();

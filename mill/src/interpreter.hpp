@@ -64,7 +64,7 @@ namespace mill {
                 auto result =
                     PrimitiveType<VM::CXXFunction>::instance().get(callee)
                     .implementation
-                    ->operator()(argc, argv);
+                    ->operator()(*vm, argc, argv);
                 stack.push(result);
 
                 return nullptr;

@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+#include <boost/utility.hpp>
 #include <cstddef>
 #include <functional>
 #include "gc.hpp"
@@ -10,11 +11,11 @@
 #include <vector>
 
 namespace mill {
-    class VM {
+    class VM : boost::noncopyable {
     public:
         struct Unit { };
         struct String { char* data; std::size_t size; };
-        struct CXXFunction { std::function<Value*(std::size_t, Value**)>* implementation; };
+        struct CXXFunction { std::function<Value*(VM&, std::size_t, Value**)>* implementation; };
 
         VM() {
             unitType = &PrimitiveType<Unit>::instance();
@@ -76,7 +77,7 @@ namespace mill {
         Value* function(F f) {
             auto result = gc.alloc(*cxxFunctionType);
             CXXFunction data;
-            data.implementation = new std::function<Value*(std::size_t, Value**)>(std::move(f));
+            data.implementation = new std::function<Value*(VM&, std::size_t, Value**)>(std::move(f));
             cxxFunctionType->set(result, data);
             return result;
         }
