@@ -16,6 +16,7 @@ w.variable('cxxflags', os.environ.get('CXXFLAGS', '') + '''
     -std=c++1y
     -Wall -Wextra -Werror -pedantic
     -I ~/Catch/include
+    -I ~/nonius/include
     -I ~/baka/include
     -g
 '''.replace('\n', ' '))
@@ -27,13 +28,14 @@ w.rule('instructions', 'tools/instructions.awk $in > $out')
 
 w.build('$builddir/instructions.hpp', 'instructions', ['src/instructions.txt'])
 
-targets = {'src': [], 'test': []}
-for kind, source_file in [('src', f) for f in glob('src/*.cpp')] + [('test', f) for f in glob('test/*.cpp')]:
+targets = {'src': [], 'test': [], 'bench': []}
+for kind, source_file in [('src', f) for f in glob('src/*.cpp')] + [('test', f) for f in glob('test/*.cpp')] + [('bench', f) for f in glob('bench/*.cpp')]:
     target = '$builddir/' + source_file.replace('.cpp', '.o')
     targets[kind].append(target)
     if kind == 'src' and source_file != 'src/main.cpp':
         targets['test'].append(target)
-    w.build(target, 'cxx', [source_file])
+        targets['bench'].append(target)
+    w.build(target, 'cxx', [source_file], implicit=['$builddir/instructions.hpp'])
 
 for target in targets:
     if targets[target]:
