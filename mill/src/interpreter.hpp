@@ -25,7 +25,7 @@ namespace mill {
                 return result;
             }
 
-            GCPtr visitPushModuleMember(std::uint32_t nameIndex) {
+            GCPtr visitPushGlobal(std::uint32_t nameIndex) {
                 stack.push(vm->global(*object, nameIndex));
                 return nullptr;
             }
