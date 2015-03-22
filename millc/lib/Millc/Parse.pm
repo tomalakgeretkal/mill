@@ -133,7 +133,7 @@ sub parse {
         expect('eof');
         @$result;
     };
-    { type => 'module', decls => \@decls },
+    { type => 'module', decls => \@decls };
 }
 
 1;
