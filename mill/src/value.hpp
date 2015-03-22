@@ -2,6 +2,7 @@
 #include <boost/utility.hpp>
 #include <cstddef>
 #include <cstring>
+#include "gc.hpp"
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -19,14 +20,15 @@ namespace mill {
         Type* type;
         std::size_t offset;
 
-        Value* get(Value* container) const {
+        GCPtr get(GC& gc, GCPtr container) const {
             Value* member;
-            std::memcpy(&member, (char*)container + offset, sizeof(Value*));
-            return member;
+            std::memcpy(&member, (char*)container.get() + offset, sizeof(Value*));
+            return gc.root(member);
         }
 
-        void set(Value* container, Value* member) const {
-            std::memcpy((char*)container + offset, &member, sizeof(Value*));
+        void set(GCPtr container, GCPtr member) const {
+            auto memberPtr = member.get();
+            std::memcpy((char*)container.get() + offset, &memberPtr, sizeof(Value*));
         }
     };
 
@@ -51,12 +53,12 @@ namespace mill {
             return type;
         }
 
-        T get(Value* container) {
-            return reinterpret_cast<Representation*>(container)->value;
+        T get(GCPtr container) {
+            return reinterpret_cast<Representation*>(container.get())->value;
         }
 
-        void set(Value* container, T value) {
-            reinterpret_cast<Representation*>(container)->value = value;
+        void set(GCPtr container, T value) {
+            reinterpret_cast<Representation*>(container.get())->value = value;
         }
 
         std::size_t size() const override {

@@ -15,7 +15,7 @@ namespace mill {
     public:
         struct Unit { };
         struct String { char* data; std::size_t size; };
-        struct CXXSubroutine { std::function<Value*(VM&, std::size_t, Value**)>* implementation; };
+        struct CXXSubroutine { std::function<GCPtr(VM&, std::size_t, GCPtr*)>* implementation; };
 
         VM() {
             unitType = &PrimitiveType<Unit>::instance();
@@ -38,12 +38,12 @@ namespace mill {
             }
         }
 
-        Value* unit() { return unit_; }
+        GCPtr unit() { return unit_; }
 
-        Value* true_() { return true__; }
-        Value* false_() { return false__; }
+        GCPtr true_() { return true__; }
+        GCPtr false_() { return false__; }
 
-        Value* string(std::string const& value) {
+        GCPtr string(std::string const& value) {
             auto result = gc.alloc(*stringType);
 
             String data;
@@ -55,29 +55,29 @@ namespace mill {
             return result;
         }
 
-        Value* string(Object const& object, std::size_t index) {
+        GCPtr string(Object const& object, std::size_t index) {
             return strings.at(&object)[index];
         }
 
-        std::string unstring(Value* value) {
+        std::string unstring(GCPtr value) {
             auto data = stringType->get(value);
             return std::string(data.data, data.data + data.size);
         }
 
-        void setGlobal(std::string name, Value* value) {
+        void setGlobal(std::string name, GCPtr value) {
             globals[name] = value;
         }
 
-        Value* global(Object const& object, std::size_t nameIndex) {
+        GCPtr global(Object const& object, std::size_t nameIndex) {
             auto const& name = strings.at(&object)[nameIndex];
             return globals.at(unstring(name));
         }
 
         template<typename F>
-        Value* subroutine(F f) {
+        GCPtr subroutine(F f) {
             auto result = gc.alloc(*cxxSubroutineType);
             CXXSubroutine data;
-            data.implementation = new std::function<Value*(VM&, std::size_t, Value**)>(std::move(f));
+            data.implementation = new std::function<GCPtr(VM&, std::size_t, GCPtr*)>(std::move(f));
             cxxSubroutineType->set(result, data);
             return result;
         }
@@ -86,17 +86,17 @@ namespace mill {
 
     private:
         PrimitiveType<Unit>* unitType;
-        Value* unit_;
+        GCPtr unit_;
 
         PrimitiveType<bool>* booleanType;
-        Value* true__;
-        Value* false__;
+        GCPtr true__;
+        GCPtr false__;
 
         PrimitiveType<String>* stringType;
-        std::unordered_map<Object const*, std::vector<Value*>> strings;
+        std::unordered_map<Object const*, std::vector<GCPtr>> strings;
 
         PrimitiveType<CXXSubroutine>* cxxSubroutineType;
 
-        std::unordered_map<std::string, Value*> globals;
+        std::unordered_map<std::string, GCPtr> globals;
     };
 }

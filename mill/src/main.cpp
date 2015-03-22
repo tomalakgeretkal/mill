@@ -3,6 +3,7 @@
 #include <baka/io/memory_stream.hpp>
 #include <cstddef>
 #include <fcntl.h>
+#include "gc.hpp"
 #include "interpreter.hpp"
 #include <iostream>
 #include "object.hpp"
@@ -26,7 +27,7 @@ int main(int argc, char const** argv) {
 
     VM vm;
     vm.loadObject(object);
-    vm.setGlobal("std::io::writeln", vm.subroutine([&] (VM&, std::size_t, Value** argv) {
+    vm.setGlobal("std::io::writeln", vm.subroutine([&] (VM&, std::size_t, GCPtr* argv) {
         std::cout << vm.unstring(argv[0]) << '\n';
         return vm.unit();
     }));

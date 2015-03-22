@@ -1,10 +1,12 @@
 #pragma once
 #include <algorithm>
 #include <cstdint>
+#include "gc.hpp"
 #include "instructions.hpp"
 #include "object.hpp"
 #include <stack>
 #include "value.hpp"
+#include <vector>
 #include "vm.hpp"
 
 namespace mill {
@@ -15,48 +17,46 @@ namespace mill {
             Interpreter(VM& vm, Object const& object, ReaderSeeker& source)
                 : vm(&vm), object(&object), source(&source) { }
 
-            Value* operator()() {
-                Value* result = nullptr;
+            GCPtr operator()() {
+                GCPtr result;
                 while (!result) {
                     result = readInstruction(*source, *this);
                 }
                 return result;
             }
 
-            Value* visitPushModuleMember(std::uint32_t nameIndex) {
+            GCPtr visitPushModuleMember(std::uint32_t nameIndex) {
                 stack.push(vm->global(*object, nameIndex));
                 return nullptr;
             }
 
-            Value* visitPushString(std::uint32_t index) {
+            GCPtr visitPushString(std::uint32_t index) {
                 stack.push(vm->string(*object, index));
                 return nullptr;
             }
 
-            Value* visitPushBoolean(std::uint8_t value) {
+            GCPtr visitPushBoolean(std::uint8_t value) {
                 stack.push(value ? vm->true_() : vm->false_());
                 return nullptr;
             }
 
-            Value* visitPushUnit() {
+            GCPtr visitPushUnit() {
                 stack.push(vm->unit());
                 return nullptr;
             }
 
-            Value* visitPop() {
+            GCPtr visitPop() {
                 stack.pop();
                 return nullptr;
             }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wvla-extension"
-            Value* visitCall(std::uint32_t argc) {
-                Value* argv[argc];
+            GCPtr visitCall(std::uint32_t argc) {
+                std::vector<GCPtr> argv(argc);
                 for (decltype(argc) i = 0; i < argc; ++i) {
                     argv[i] = stack.top();
                     stack.pop();
                 }
-                std::reverse(argv, argv + argc);
+                std::reverse(argv.begin(), argv.end());
 
                 auto callee = stack.top();
                 stack.pop();
@@ -64,14 +64,13 @@ namespace mill {
                 auto result =
                     PrimitiveType<VM::CXXSubroutine>::instance().get(callee)
                     .implementation
-                    ->operator()(*vm, argc, argv);
+                    ->operator()(*vm, argc, argv.data());
                 stack.push(result);
 
                 return nullptr;
             }
-#pragma GCC diagnostic pop
 
-            Value* visitReturn() {
+            GCPtr visitReturn() {
                 return stack.top();
             }
 
@@ -79,12 +78,12 @@ namespace mill {
             VM* vm;
             Object const* object;
             ReaderSeeker* source;
-            std::stack<Value*> stack;
+            std::stack<GCPtr> stack;
         };
     }
 
     template<typename ReaderSeeker>
-    Value* interpret(VM& vm, Object const& object, ReaderSeeker& source) {
+    GCPtr interpret(VM& vm, Object const& object, ReaderSeeker& source) {
         detail::Interpreter<ReaderSeeker> interpreter(vm, object, source);
         return interpreter();
     }
