@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "instructions.hpp"
+#include "object.hpp"
 #include <stack>
 #include "value.hpp"
 #include "vm.hpp"
@@ -10,8 +11,8 @@ namespace mill {
         template<typename ReaderSeeker>
         class Interpreter {
         public:
-            Interpreter(VM& vm, ReaderSeeker& source)
-                : vm(&vm), source(&source) { }
+            Interpreter(VM& vm, Object& object, ReaderSeeker& source)
+                : vm(&vm), object(&object), source(&source) { }
 
             Value* operator()() {
                 Value* result = nullptr;
@@ -25,8 +26,9 @@ namespace mill {
                 throw "not implemented";
             }
 
-            Value* visitPushString(std::uint32_t) {
-                throw "not implemented";
+            Value* visitPushString(std::uint32_t index) {
+                stack.push(vm->string(*object, index));
+                return nullptr;
             }
 
             Value* visitPushBoolean(std::uint8_t value) {
@@ -54,14 +56,15 @@ namespace mill {
 
         private:
             VM* vm;
+            Object* object;
             ReaderSeeker* source;
             std::stack<Value*> stack;
         };
     }
 
     template<typename ReaderSeeker>
-    Value* interpret(VM& vm, ReaderSeeker& source) {
-        detail::Interpreter<ReaderSeeker> interpreter(vm, source);
+    Value* interpret(VM& vm, Object& object, ReaderSeeker& source) {
+        detail::Interpreter<ReaderSeeker> interpreter(vm, object, source);
         return interpreter();
     }
 }
