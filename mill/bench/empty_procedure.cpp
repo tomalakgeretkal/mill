@@ -9,8 +9,8 @@ NONIUS_BENCHMARK("empty procedure", [] (nonius::chronometer meter) {
     mill::Object object;
     mill::VM vm;
 
+    std::vector<char> data{ 0x06, 0x05 };
     meter.measure([&] {
-        std::vector<char> data{ 0x06, 0x05 };
         baka::io::memory_stream source;
         source.write(data.data(), data.data() + data.size());
         source.seek_begin(0);

@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 from glob import glob
 import os
+import subprocess
 import sys; sys.path.append('tools')
 
 from ninja_syntax import Writer
+
+def llvm_config(*args):
+    return subprocess.check_output(['/usr/local/Cellar/llvm/3.5.1/bin/llvm-config'] + list(args)).decode()
 
 w = Writer(open('build.ninja', 'w'))
 
@@ -12,15 +16,21 @@ w.variable('builddir', 'build')
 w.variable('cxx', os.environ.get('CXX', 'clang++'))
 w.variable('ld', '$cxx')
 
-w.variable('cxxflags', os.environ.get('CXXFLAGS', '') + '''
+w.variable('cxxflags', (os.environ.get('CXXFLAGS', '') + '''
     -std=c++1y
     -Wall -Wextra -Werror -pedantic
-    -I ~/Catch/include
-    -I ~/nonius/include
-    -I ~/baka/include
+    -isystem ~/Catch/include
+    -isystem ~/nonius/include
+    -isystem ~/baka/include
+    -isystem ''' + llvm_config('--includedir') + '''
+    -D__STDC_LIMIT_MACROS
+    -D__STDC_CONSTANT_MACROS
     -g
-'''.replace('\n', ' '))
-w.variable('ldflags', '')
+''').replace('\n', ' '))
+w.variable('ldflags', ('''
+    -L ''' + llvm_config('--libdir') + '''
+    ''' + llvm_config('--libs', 'Core') + '''
+''').replace('\n', ' '))
 
 w.rule('cxx', '$cxx $cxxflags -MMD -MF $out.d -c -o $out $in', depfile='$out.d')
 w.rule('ld', '$ld $ldflags -o $out $in')
