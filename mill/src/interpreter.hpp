@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <cstdint>
 #include "instructions.hpp"
 #include "object.hpp"
@@ -22,8 +23,9 @@ namespace mill {
                 return result;
             }
 
-            Value* visitPushModuleMember(std::uint32_t) {
-                throw "not implemented";
+            Value* visitPushModuleMember(std::uint32_t nameIndex) {
+                stack.push(vm->global(*object, nameIndex));
+                return nullptr;
             }
 
             Value* visitPushString(std::uint32_t index) {
@@ -46,9 +48,28 @@ namespace mill {
                 return nullptr;
             }
 
-            Value* visitCall(std::uint32_t) {
-                throw "not implemented";
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wvla-extension"
+            Value* visitCall(std::uint32_t argc) {
+                Value* argv[argc];
+                for (decltype(argc) i = 0; i < argc; ++i) {
+                    argv[i] = stack.top();
+                    stack.pop();
+                }
+                std::reverse(argv, argv + argc);
+
+                auto callee = stack.top();
+                stack.pop();
+
+                auto result =
+                    PrimitiveType<VM::CXXFunction>::instance().get(callee)
+                    .implementation
+                    ->operator()(argc, argv);
+                stack.push(result);
+
+                return nullptr;
             }
+#pragma GCC diagnostic pop
 
             Value* visitReturn() {
                 return stack.top();

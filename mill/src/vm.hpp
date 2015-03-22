@@ -1,15 +1,21 @@
 #pragma once
 #include <algorithm>
 #include <cstddef>
+#include <functional>
 #include "gc.hpp"
 #include "object.hpp"
 #include <unordered_map>
+#include <utility>
 #include "value.hpp"
 #include <vector>
 
 namespace mill {
     class VM {
     public:
+        struct Unit { };
+        struct String { char* data; std::size_t size; };
+        struct CXXFunction { std::function<Value*(std::size_t, Value**)>* implementation; };
+
         VM() {
             unitType = &PrimitiveType<Unit>::instance();
             unit_ = gc.alloc(*unitType);
@@ -21,6 +27,8 @@ namespace mill {
             booleanType->set(false__, false);
 
             stringType = &PrimitiveType<String>::instance();
+
+            cxxFunctionType = &PrimitiveType<CXXFunction>::instance();
         }
 
         void loadObject(Object const& object) {
@@ -55,10 +63,27 @@ namespace mill {
             return std::string(data.data, data.data + data.size);
         }
 
+        void setGlobal(std::string name, Value* value) {
+            globals[name] = value;
+        }
+
+        Value* global(Object const& object, std::size_t nameIndex) {
+            auto const& name = strings.at(&object)[nameIndex];
+            return globals.at(unstring(name));
+        }
+
+        template<typename F>
+        Value* function(F f) {
+            auto result = gc.alloc(*cxxFunctionType);
+            CXXFunction data;
+            data.implementation = new std::function<Value*(std::size_t, Value**)>(std::move(f));
+            cxxFunctionType->set(result, data);
+            return result;
+        }
+
         GC gc;
 
     private:
-        struct Unit { };
         PrimitiveType<Unit>* unitType;
         Value* unit_;
 
@@ -66,8 +91,11 @@ namespace mill {
         Value* true__;
         Value* false__;
 
-        struct String { char* data; std::size_t size; };
         PrimitiveType<String>* stringType;
         std::unordered_map<Object const*, std::vector<Value*>> strings;
+
+        PrimitiveType<CXXFunction>* cxxFunctionType;
+
+        std::unordered_map<std::string, Value*> globals;
     };
 }
