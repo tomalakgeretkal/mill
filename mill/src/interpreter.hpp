@@ -63,7 +63,7 @@ namespace mill {
                 stack.pop();
 
                 auto result =
-                    PrimitiveType<VM::CXXSubroutine>::instance().get(callee)
+                    PrimitiveType<VM::Subroutine>::instance().get(callee)
                     .implementation
                     ->operator()(*vm, argc, argv.data());
                 stack.push(result);

@@ -15,7 +15,7 @@ namespace mill {
     public:
         struct Unit { };
         struct String { char* data; std::size_t size; };
-        struct CXXSubroutine { std::function<GCPtr(VM&, std::size_t, GCPtr*)>* implementation; };
+        struct Subroutine { std::function<GCPtr(VM&, std::size_t, GCPtr*)>* implementation; };
 
         VM() {
             unitType = &PrimitiveType<Unit>::instance();
@@ -29,7 +29,7 @@ namespace mill {
 
             stringType = &PrimitiveType<String>::instance();
 
-            cxxSubroutineType = &PrimitiveType<CXXSubroutine>::instance();
+            cxxSubroutineType = &PrimitiveType<Subroutine>::instance();
         }
 
         void loadObject(Object const& object);
@@ -76,7 +76,7 @@ namespace mill {
         template<typename F>
         GCPtr subroutine(F f) {
             auto result = gc.alloc(*cxxSubroutineType);
-            CXXSubroutine data;
+            Subroutine data;
             data.implementation = new std::function<GCPtr(VM&, std::size_t, GCPtr*)>(std::move(f));
             cxxSubroutineType->set(result, data);
             return result;
@@ -95,7 +95,7 @@ namespace mill {
         PrimitiveType<String>* stringType;
         std::unordered_map<Object const*, std::vector<GCPtr>> strings;
 
-        PrimitiveType<CXXSubroutine>* cxxSubroutineType;
+        PrimitiveType<Subroutine>* cxxSubroutineType;
 
         std::unordered_map<std::string, GCPtr> globals;
     };

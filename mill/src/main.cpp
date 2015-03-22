@@ -32,7 +32,7 @@ int main(int argc, char const** argv) {
         return vm.unit();
     }));
 
-    PrimitiveType<VM::CXXSubroutine>::instance().get(vm.global("main::MAIN"))
+    PrimitiveType<VM::Subroutine>::instance().get(vm.global("main::MAIN"))
     .implementation
     ->operator()(vm, 0, nullptr);
 
