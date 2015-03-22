@@ -30,6 +30,8 @@ targets = {'src': [], 'test': []}
 for kind, source_file in [('src', f) for f in glob('src/*.cpp')] + [('test', f) for f in glob('test/*.cpp')]:
     target = '$builddir/' + source_file.replace('.cpp', '.o')
     targets[kind].append(target)
+    if kind == 'src' and source_file != 'src/main.cpp':
+        targets['test'].append(target)
     w.build(target, 'cxx', [source_file])
 
 for target in targets:
