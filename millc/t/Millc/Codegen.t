@@ -21,6 +21,7 @@ my $ast = resolve(parse([lex($hello_world)]));
 
 my $object_builder = Millc::ObjectBuilder->new();
 codegen($object_builder, 'Millc::BytecodeBuilder', $ast);
+$object_builder->name('main');
 my $data = '';
 open my $fh, '>:raw', \$data;
 $object_builder->write($fh);
@@ -31,11 +32,14 @@ eq_or_diff(
     "\xDE\xAD\xBE\xEF" . # magic
     "\x00\x00\x00\x00\x01\x00" . # version
 
-    "\x04\x00\x00\x00" . # string count
+    "\x05\x00\x00\x00" . # string count
     "\x07\x00\x00\x00std::io" .
     "\x10\x00\x00\x00std::io::writeln" .
     "\x0D\x00\x00\x00Hello, world!" .
     "\x04\x00\x00\x00MAIN" .
+    "\x04\x00\x00\x00main" .
+
+    "\x04\x00\x00\x00" . # module name
 
     "\x01\x00\x00\x00" . # dependency count
     "\x00\x00\x00\x00" .

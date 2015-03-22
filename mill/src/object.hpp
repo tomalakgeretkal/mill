@@ -20,6 +20,7 @@ namespace mill {
         };
 
         std::vector<std::string> strings;
+        std::size_t name;
         std::vector<std::size_t> dependencies;
         std::vector<Subroutine> subroutines;
     };
@@ -49,6 +50,8 @@ namespace mill {
             baka::io::read_full(reader, &string[0], &string[0] + string.size());
         }
 
+        auto name = INT(std::uint32_t);
+
         auto dependencyCount = INT(std::uint32_t);
         std::vector<std::size_t> dependencies(dependencyCount);
         for (auto& dependency : dependencies) {
@@ -71,6 +74,7 @@ namespace mill {
 
         Object object;
         object.strings = std::move(strings);
+        object.name = name;
         object.dependencies = std::move(dependencies);
         object.subroutines = std::move(subroutines);
         return object;

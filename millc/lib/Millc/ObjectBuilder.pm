@@ -5,6 +5,7 @@ use Set::Scalar;
 sub new {
     bless {
         strings => [],
+        name => undef,
         dependencies => [],
         subroutines => [],
     };
@@ -12,6 +13,11 @@ sub new {
 
 sub string {
     push(shift->{strings}, shift) - 1;
+}
+
+sub name {
+    my ($self, $name) = @_;
+    $self->{name} = $self->string($name);
 }
 
 sub dependency {
@@ -39,6 +45,8 @@ sub write {
         print $fh pack('L<', length $_);
         print $fh $_;
     }
+
+    print $fh pack('L<', $self->{name});
 
     print $fh pack('L<', scalar @{$self->{dependencies}});
     for (@{$self->{dependencies}}) {

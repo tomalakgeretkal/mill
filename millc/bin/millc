@@ -16,6 +16,7 @@ if (@ARGV != 2) {
 my $code = read_file($ARGV[0]);
 my $module = resolve(parse([lex($code)]));
 my $object_builder = Millc::ObjectBuilder->new();
+$object_builder->name('main');
 codegen($object_builder, 'Millc::BytecodeBuilder', $module);
 open my $object_fh, '>', $ARGV[1];
 $object_builder->write($object_fh);
