@@ -8,7 +8,7 @@ my $data = '';
 open my $fh, '>:raw', \$data;
 my $builder = Millc::BytecodeBuilder->new($fh);
 
-$builder->push_module_member(0);
+$builder->push_global(0);
 $builder->push_string(1);
 $builder->call(1);
 $builder->pop();

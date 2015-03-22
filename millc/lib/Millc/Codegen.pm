@@ -66,7 +66,7 @@ sub codegen_name_expr {
     my $name = shift->{name};
     my $fqname = join('::', @{$name->{module}}, $name->{member});
     my $fqname_id = $object_builder->string($fqname);
-    $bytecode_builder->push_module_member($fqname_id);
+    $bytecode_builder->push_global($fqname_id);
 }
 
 sub codegen_string_expr {

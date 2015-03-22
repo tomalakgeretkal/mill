@@ -7,7 +7,7 @@ sub new {
     };
 }
 
-sub push_module_member {
+sub push_global {
     my $fh = shift->{fh};
     print $fh "\x01";
     print $fh pack('L<', shift);
