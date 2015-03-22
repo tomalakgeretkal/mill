@@ -2,6 +2,7 @@
 
 0x01 PushModuleMember uint32
 0x02 PushString uint32
+0x07 PushBoolean uint8
 0x06 PushUnit
 
 0x04 Pop

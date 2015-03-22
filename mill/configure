@@ -17,6 +17,7 @@ w.variable('cxxflags', os.environ.get('CXXFLAGS', '') + '''
     -Wall -Wextra -Werror -pedantic
     -I ~/Catch/include
     -I ~/baka/include
+    -g
 '''.replace('\n', ' '))
 w.variable('ldflags', '')
 

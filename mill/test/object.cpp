@@ -1,4 +1,4 @@
-#include "../src/object_file.hpp"
+#include "../src/object.hpp"
 #include <baka/io/pipe.hpp>
 #include <catch.hpp>
 #include <cstddef>
