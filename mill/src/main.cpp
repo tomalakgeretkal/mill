@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <baka/io/file_descriptor.hpp>
 #include <baka/io/file_stream.hpp>
-#include <baka/io/memory_stream.hpp>
 #include <cstddef>
 #include <fcntl.h>
 #include "gc.hpp"
@@ -33,15 +32,9 @@ int main(int argc, char const** argv) {
         return vm.unit();
     }));
 
-    auto const& body =
-        std::find_if(object.subroutines.begin(),
-                     object.subroutines.end(),
-                     [&] (auto const& s) { return object.strings.at(s.name) == "MAIN"; })
-        ->body;
-    baka::io::memory_stream bodyReader;
-    bodyReader.write((char*)body.data(), (char*)body.data() + body.size());
-    bodyReader.seek_begin(0);
-    interpret(vm, object, bodyReader);
+    PrimitiveType<VM::CXXSubroutine>::instance().get(vm.global("main::MAIN"))
+    .implementation
+    ->operator()(vm, 0, nullptr);
 
     return 0;
 }

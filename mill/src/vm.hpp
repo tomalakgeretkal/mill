@@ -32,11 +32,7 @@ namespace mill {
             cxxSubroutineType = &PrimitiveType<CXXSubroutine>::instance();
         }
 
-        void loadObject(Object const& object) {
-            for (auto&& string : object.strings) {
-                strings[&object].push_back(this->string(string));
-            }
-        }
+        void loadObject(Object const& object);
 
         GCPtr unit() { return unit_; }
 
@@ -66,6 +62,10 @@ namespace mill {
 
         void setGlobal(std::string name, GCPtr value) {
             globals[name] = value;
+        }
+
+        GCPtr global(std::string name) {
+            return globals.at(name);
         }
 
         GCPtr global(Object const& object, std::size_t nameIndex) {
