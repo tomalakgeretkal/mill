@@ -26,7 +26,7 @@ int main(int argc, char const** argv) {
 
     VM vm;
     vm.loadObject(object);
-    vm.setGlobal("std::io::writeln", vm.function([&] (VM&, std::size_t, Value** argv) {
+    vm.setGlobal("std::io::writeln", vm.subroutine([&] (VM&, std::size_t, Value** argv) {
         std::cout << vm.unstring(argv[0]) << '\n';
         return vm.unit();
     }));

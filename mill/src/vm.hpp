@@ -15,7 +15,7 @@ namespace mill {
     public:
         struct Unit { };
         struct String { char* data; std::size_t size; };
-        struct CXXFunction { std::function<Value*(VM&, std::size_t, Value**)>* implementation; };
+        struct CXXSubroutine { std::function<Value*(VM&, std::size_t, Value**)>* implementation; };
 
         VM() {
             unitType = &PrimitiveType<Unit>::instance();
@@ -29,7 +29,7 @@ namespace mill {
 
             stringType = &PrimitiveType<String>::instance();
 
-            cxxFunctionType = &PrimitiveType<CXXFunction>::instance();
+            cxxSubroutineType = &PrimitiveType<CXXSubroutine>::instance();
         }
 
         void loadObject(Object const& object) {
@@ -74,11 +74,11 @@ namespace mill {
         }
 
         template<typename F>
-        Value* function(F f) {
-            auto result = gc.alloc(*cxxFunctionType);
-            CXXFunction data;
+        Value* subroutine(F f) {
+            auto result = gc.alloc(*cxxSubroutineType);
+            CXXSubroutine data;
             data.implementation = new std::function<Value*(VM&, std::size_t, Value**)>(std::move(f));
-            cxxFunctionType->set(result, data);
+            cxxSubroutineType->set(result, data);
             return result;
         }
 
@@ -95,7 +95,7 @@ namespace mill {
         PrimitiveType<String>* stringType;
         std::unordered_map<Object const*, std::vector<Value*>> strings;
 
-        PrimitiveType<CXXFunction>* cxxFunctionType;
+        PrimitiveType<CXXSubroutine>* cxxSubroutineType;
 
         std::unordered_map<std::string, Value*> globals;
     };
