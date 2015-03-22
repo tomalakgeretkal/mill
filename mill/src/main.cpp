@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <baka/io/file_descriptor.hpp>
 #include <baka/io/file_stream.hpp>
 #include <baka/io/memory_stream.hpp>
@@ -32,7 +33,11 @@ int main(int argc, char const** argv) {
         return vm.unit();
     }));
 
-    auto const& body = object.subroutines[0].body;
+    auto const& body =
+        std::find_if(object.subroutines.begin(),
+                     object.subroutines.end(),
+                     [&] (auto const& s) { return object.strings.at(s.name) == "MAIN"; })
+        ->body;
     baka::io::memory_stream bodyReader;
     bodyReader.write((char*)body.data(), (char*)body.data() + body.size());
     bodyReader.seek_begin(0);
