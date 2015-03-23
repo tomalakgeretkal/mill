@@ -24,20 +24,23 @@ void mill::VM::loadObject(Object const& object) {
             std::find_if(object.subroutines.begin(), object.subroutines.end(),
                          [&] (auto const& s) { return object.strings.at(s.name) == object.strings[subroutine.name]; })
             ->body;
-        globals[object.strings[object.name] + "::" + object.strings[subroutine.name]] =
-            make<Subroutine>([this, callCount = std::make_shared<std::atomic<long>>(), &object, &body]
-                             (VM& vm, std::size_t, boost::intrusive_ptr<Value>*) mutable {
-                if (++*callCount == jitThreshold) {
-                    baka::io::memory_stream bodyReader;
-                    bodyReader.write((char*)body.data(), (char*)body.data() + body.size());
-                    bodyReader.seek_begin(0);
-                    jitCompile(vm, object, bodyReader);
-                }
+        auto& subroutineGlobal = globals[object.strings[object.name] + "::" + object.strings[subroutine.name]];
+        subroutineGlobal = make<Subroutine>([this, callCount = std::make_shared<std::atomic<long>>(), &object, &body, &subroutineGlobal]
+                                            (VM& vm, std::size_t argc, boost::intrusive_ptr<Value>* argv) mutable {
+            if ((*callCount)++ == jitThreshold) {
+                baka::io::memory_stream bodyReader;
+                bodyReader.write((char*)body.data(), (char*)body.data() + body.size());
+                bodyReader.seek_begin(0);
+                static_cast<Subroutine*>(subroutineGlobal.get())->value() = jitCompile(vm, object, bodyReader);
+                // !!! From now on, we cannot reference any captured variables! !!!
+                return static_cast<Subroutine*>(subroutineGlobal.get())->value()(vm, argc, argv);
+            } else {
                 baka::io::memory_stream bodyReader;
                 bodyReader.write((char*)body.data(), (char*)body.data() + body.size());
                 bodyReader.seek_begin(0);
                 return interpret(vm, object, bodyReader);
-            });
+            }
+        });
     }
 }
 

@@ -1,9 +1,12 @@
 #pragma once
+#include <iostream>
 #include <algorithm>
 #include <boost/intrusive_ptr.hpp>
 #include <cstdarg>
 #include <cstdint>
 #include "instructions.hpp"
+#include <llvm/ExecutionEngine/ExecutionEngine.h>
+#include <llvm/ExecutionEngine/JIT.h>
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/DerivedTypes.h>
@@ -14,6 +17,7 @@
 #include <llvm/IR/Type.h>
 #include <llvm/IR/Value.h>
 #include <llvm/Support/Casting.h>
+#include <llvm/Support/TargetSelect.h>
 #include "object.hpp"
 #include <stack>
 #include <vector>
@@ -29,7 +33,15 @@ namespace mill {
                 : vm(&vm), object(&object), ctx(&ctx), module(&module), builder(ctx), source(&source) { }
 
             llvm::Function* operator()() {
-                auto function = llvm::cast<llvm::Function>(module->getOrInsertFunction("main", valueType(), nullptr));
+                auto functionConstant = module->getOrInsertFunction(
+                    "main",
+                    valueType(),
+                    llvm::Type::getInt8PtrTy(*ctx),
+                    llvm::Type::getInt64Ty(*ctx),
+                    llvm::PointerType::getUnqual(valueType()),
+                    nullptr
+                );
+                auto function = llvm::cast<llvm::Function>(functionConstant);
 
                 auto entry = llvm::BasicBlock::Create(*ctx, "", function);
                 builder.SetInsertPoint(entry);
@@ -86,7 +98,7 @@ namespace mill {
                         llvm::FunctionType::get(
                             valueType(),
                             {
-                                llvm::Type::getInt8PtrTy(*ctx),
+                                valueType(),
                                 llvm::Type::getInt8PtrTy(*ctx),
                                 llvm::Type::getInt64Ty(*ctx),
                             },
@@ -128,7 +140,7 @@ namespace mill {
                 std::vector<boost::intrusive_ptr<Value>> argv(argc);
                 va_list args; va_start(args, vargc);
                 for (decltype(argc) i = 0; i < argc; ++i) {
-                    argv.emplace_back(static_cast<Value*>(va_arg(args, void*)));
+                    argv[i] = static_cast<Value*>(va_arg(args, void*));
                 }
                 va_end(args);
 
@@ -147,10 +159,21 @@ namespace mill {
     }
 
     template<typename ReaderSeeker>
-    llvm::Function* jitCompile(VM& vm, Object const& object, ReaderSeeker& source) {
+    auto jitCompile(VM& vm, Object const& object, ReaderSeeker& source) {
         static llvm::LLVMContext ctx;
-        static llvm::Module module("main", ctx);
-        detail::JITCompiler<ReaderSeeker> jitCompiler(vm, object, ctx, module, source);
-        return jitCompiler();
+        static auto module = new llvm::Module("main", ctx);
+        static auto engine = (llvm::InitializeNativeTarget(), llvm::EngineBuilder(module).create());
+
+        detail::JITCompiler<ReaderSeeker> jitCompiler(vm, object, ctx, *module, source);
+        auto llvmPointer = jitCompiler();
+
+        auto functionPointer = reinterpret_cast<void*(*)(void*, std::uint64_t, void**)>(engine->getPointerToFunction(llvmPointer));
+        return [=] (VM& vm, std::size_t argc, boost::intrusive_ptr<Value>* argv) -> boost::intrusive_ptr<Value> {
+            std::vector<void*> vargv(argc);
+            for (decltype(argc) i = 0; i < argc; ++i) {
+                vargv[i] = argv[i].get();
+            }
+            return static_cast<Value*>(functionPointer(&vm, argc, vargv.data()));
+        };
     }
 }
