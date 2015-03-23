@@ -32,7 +32,9 @@ int main(int argc, char const** argv) {
         return make<Unit>();
     }));
 
-    dynamic_cast<Subroutine&>(*vm.global("main::MAIN")).value()(vm, 0, nullptr);
+    for (auto i = 0; i < 100; ++i) {
+        dynamic_cast<Subroutine&>(*vm.global("main::MAIN")).value()(vm, 0, nullptr);
+    }
 
     return 0;
 }

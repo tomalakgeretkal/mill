@@ -1,11 +1,18 @@
+#include <atomic>
 #include <baka/io/memory_stream.hpp>
 #include <boost/intrusive_ptr.hpp>
 #include "interpreter.hpp"
+#include "jit.hpp"
+#include <memory>
 #include "object.hpp"
 #include <string>
 #include <utility>
 #include "value.hpp"
 #include "vm.hpp"
+
+namespace {
+    auto constexpr jitThreshold = 10;
+}
 
 void mill::VM::loadObject(Object const& object) {
     for (auto&& string : object.strings) {
@@ -18,7 +25,14 @@ void mill::VM::loadObject(Object const& object) {
                          [&] (auto const& s) { return object.strings.at(s.name) == object.strings[subroutine.name]; })
             ->body;
         globals[object.strings[object.name] + "::" + object.strings[subroutine.name]] =
-            make<Subroutine>([&object, &body] (VM& vm, std::size_t, boost::intrusive_ptr<Value>*) {
+            make<Subroutine>([this, callCount = std::make_shared<std::atomic<long>>(), &object, &body]
+                             (VM& vm, std::size_t, boost::intrusive_ptr<Value>*) mutable {
+                if (++*callCount == jitThreshold) {
+                    baka::io::memory_stream bodyReader;
+                    bodyReader.write((char*)body.data(), (char*)body.data() + body.size());
+                    bodyReader.seek_begin(0);
+                    jitCompile(vm, object, bodyReader);
+                }
                 baka::io::memory_stream bodyReader;
                 bodyReader.write((char*)body.data(), (char*)body.data() + body.size());
                 bodyReader.seek_begin(0);
