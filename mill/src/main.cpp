@@ -1,9 +1,9 @@
 #include <algorithm>
 #include <baka/io/file_descriptor.hpp>
 #include <baka/io/file_stream.hpp>
+#include <boost/intrusive_ptr.hpp>
 #include <cstddef>
 #include <fcntl.h>
-#include "gc.hpp"
 #include "interpreter.hpp"
 #include <iostream>
 #include "object.hpp"
@@ -27,14 +27,12 @@ int main(int argc, char const** argv) {
 
     VM vm;
     vm.loadObject(object);
-    vm.setGlobal("std::io::writeln", vm.subroutine([&] (VM&, std::size_t, GCPtr* argv) {
-        std::cout << vm.unstring(argv[0]) << '\n';
-        return vm.unit();
+    vm.setGlobal("std::io::writeln", make<Subroutine>([&] (VM&, std::size_t, boost::intrusive_ptr<Value>* argv) {
+        std::cout << dynamic_cast<String&>(*argv[0]).value() << '\n';
+        return make<Unit>();
     }));
 
-    PrimitiveType<VM::Subroutine>::instance().get(vm.global("main::MAIN"))
-    .implementation
-    ->operator()(vm, 0, nullptr);
+    dynamic_cast<Subroutine&>(*vm.global("main::MAIN")).value()(vm, 0, nullptr);
 
     return 0;
 }

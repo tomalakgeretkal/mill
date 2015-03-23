@@ -1,102 +1,25 @@
 #pragma once
-#include <algorithm>
+#include <boost/intrusive_ptr.hpp>
 #include <boost/utility.hpp>
-#include <cstddef>
-#include <functional>
-#include "gc.hpp"
 #include "object.hpp"
+#include <string>
 #include <unordered_map>
-#include <utility>
 #include "value.hpp"
 #include <vector>
 
 namespace mill {
     class VM : boost::noncopyable {
     public:
-        struct Unit { };
-        struct String { char* data; std::size_t size; };
-        struct Subroutine { std::function<GCPtr(VM&, std::size_t, GCPtr*)>* implementation; };
-
-        VM() {
-            unitType = &PrimitiveType<Unit>::instance();
-            unit_ = gc.alloc(*unitType);
-
-            booleanType = &PrimitiveType<bool>::instance();
-            true__ = gc.alloc(*booleanType);
-            booleanType->set(true__, true);
-            false__ = gc.alloc(*booleanType);
-            booleanType->set(false__, false);
-
-            stringType = &PrimitiveType<String>::instance();
-
-            cxxSubroutineType = &PrimitiveType<Subroutine>::instance();
-        }
-
         void loadObject(Object const& object);
 
-        GCPtr unit() { return unit_; }
+        void setGlobal(std::string const&, boost::intrusive_ptr<Value>);
+        boost::intrusive_ptr<Value> global(std::string const&) const;
+        boost::intrusive_ptr<Value> global(Object const&, std::size_t) const;
 
-        GCPtr true_() { return true__; }
-        GCPtr false_() { return false__; }
-
-        GCPtr string(std::string const& value) {
-            auto result = gc.alloc(*stringType);
-
-            String data;
-            data.data = new char[value.size()];
-            std::copy(value.begin(), value.end(), data.data);
-            data.size = value.size();
-
-            stringType->set(result, data);
-            return result;
-        }
-
-        GCPtr string(Object const& object, std::size_t index) {
-            return strings.at(&object)[index];
-        }
-
-        std::string unstring(GCPtr value) {
-            auto data = stringType->get(value);
-            return std::string(data.data, data.data + data.size);
-        }
-
-        void setGlobal(std::string name, GCPtr value) {
-            globals[name] = value;
-        }
-
-        GCPtr global(std::string name) {
-            return globals.at(name);
-        }
-
-        GCPtr global(Object const& object, std::size_t nameIndex) {
-            auto const& name = strings.at(&object)[nameIndex];
-            return globals.at(unstring(name));
-        }
-
-        template<typename F>
-        GCPtr subroutine(F f) {
-            auto result = gc.alloc(*cxxSubroutineType);
-            Subroutine data;
-            data.implementation = new std::function<GCPtr(VM&, std::size_t, GCPtr*)>(std::move(f));
-            cxxSubroutineType->set(result, data);
-            return result;
-        }
-
-        GC gc;
+        boost::intrusive_ptr<Value> string(Object const&, std::size_t) const;
 
     private:
-        PrimitiveType<Unit>* unitType;
-        GCPtr unit_;
-
-        PrimitiveType<bool>* booleanType;
-        GCPtr true__;
-        GCPtr false__;
-
-        PrimitiveType<String>* stringType;
-        std::unordered_map<Object const*, std::vector<GCPtr>> strings;
-
-        PrimitiveType<Subroutine>* cxxSubroutineType;
-
-        std::unordered_map<std::string, GCPtr> globals;
+        std::unordered_map<Object const*, std::vector<boost::intrusive_ptr<Value>>> strings;
+        std::unordered_map<std::string, boost::intrusive_ptr<Value>> globals;
     };
 }

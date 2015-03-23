@@ -3,10 +3,13 @@
 #include "../src/vm.hpp"
 #include <algorithm>
 #include <baka/io/memory_stream.hpp>
+#include <boost/intrusive_ptr.hpp>
 #include <cstddef>
 #include <catch.hpp>
 #include <iterator>
 #include <vector>
+
+using namespace mill;
 
 TEST_CASE("interpreter works", "[Interpreter]") {
     auto interpret = [] (auto& vm, auto& object, std::vector<char> const& data) {
@@ -16,55 +19,55 @@ TEST_CASE("interpreter works", "[Interpreter]") {
         return mill::interpret(vm, object, source);
     };
 
-    mill::Object object;
+    Object object;
     object.strings = { "foo", "bar" };
 
     {
-        mill::VM vm;
+        VM vm;
         vm.loadObject(object);
-        REQUIRE(vm.unit() == interpret(vm, object, {
+        REQUIRE(dynamic_cast<Unit*>(interpret(vm, object, {
             0x06,
             0x07, 0x00,
             0x07, 0x01,
             0x04,
             0x04,
             0x05,
-        }));
+        }).get()));
     }
 
     {
-        mill::VM vm;
+        VM vm;
         vm.loadObject(object);
-        REQUIRE(vm.true_() == interpret(vm, object, { 0x07, 0x01, 0x05 }));
-        REQUIRE(vm.false_() == interpret(vm, object, { 0x07, 0x00, 0x05 }));
+        REQUIRE(dynamic_cast<Boolean&>(*interpret(vm, object, { 0x07, 0x01, 0x05 })).value());
+        REQUIRE(!dynamic_cast<Boolean&>(*interpret(vm, object, { 0x07, 0x00, 0x05 })).value());
     }
 
     {
-        mill::VM vm;
+        VM vm;
         vm.loadObject(object);
-        REQUIRE(vm.unstring(interpret(vm, object, { 0x02, 0x00, 0x00, 0x00, 0x00, 0x05 })) == "foo");
-        REQUIRE(vm.unstring(interpret(vm, object, { 0x02, 0x01, 0x00, 0x00, 0x00, 0x05 })) == "bar");
+        REQUIRE(dynamic_cast<String&>(*interpret(vm, object, { 0x02, 0x00, 0x00, 0x00, 0x00, 0x05 })).value() == "foo");
+        REQUIRE(dynamic_cast<String&>(*interpret(vm, object, { 0x02, 0x01, 0x00, 0x00, 0x00, 0x05 })).value() == "bar");
     }
 
     {
-        mill::VM vm;
+        VM vm;
         std::size_t argc;
-        std::vector<mill::GCPtr> argv;
-        vm.setGlobal("foo", vm.subroutine([&] (mill::VM&, std::size_t argc_, mill::GCPtr* argv_) {
+        std::vector<boost::intrusive_ptr<Value>> argv;
+        vm.setGlobal("foo", make<Subroutine>([&] (VM&, std::size_t argc_, boost::intrusive_ptr<Value>* argv_) {
             argc = argc_;
             std::copy(argv_, argv_ + argc_, std::back_inserter(argv));
-            return vm.unit();
+            return make<Unit>();
         }));
         vm.loadObject(object);
-        REQUIRE(vm.unit() == interpret(vm, object, {
+        REQUIRE(dynamic_cast<Unit*>(interpret(vm, object, {
             0x01, 0x00, 0x00, 0x00, 0x00,
             0x06,
             0x07, 0x01,
             0x03, 0x02, 0x00, 0x00, 0x00,
             0x05,
-        }));
+        }).get()));
         REQUIRE(argc == 2);
-        REQUIRE(argv[0] == vm.unit());
-        REQUIRE(argv[1] == vm.true_());
+        REQUIRE(dynamic_cast<Unit*>(argv[0].get()));
+        REQUIRE(dynamic_cast<Boolean&>(*argv[1]).value());
     }
 }

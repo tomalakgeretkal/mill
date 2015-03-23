@@ -1,7 +1,7 @@
 #pragma once
 #include <algorithm>
+#include <boost/intrusive_ptr.hpp>
 #include <cstdint>
-#include "gc.hpp"
 #include "instructions.hpp"
 #include "object.hpp"
 #include <stack>
@@ -17,41 +17,41 @@ namespace mill {
             Interpreter(VM& vm, Object const& object, ReaderSeeker& source)
                 : vm(&vm), object(&object), source(&source) { }
 
-            GCPtr operator()() {
-                GCPtr result;
+            boost::intrusive_ptr<Value> operator()() {
+                boost::intrusive_ptr<Value> result;
                 while (!result) {
                     result = readInstruction(*source, *this);
                 }
                 return result;
             }
 
-            GCPtr visitPushGlobal(std::uint32_t nameIndex) {
+            boost::intrusive_ptr<Value> visitPushGlobal(std::uint32_t nameIndex) {
                 stack.push(vm->global(*object, nameIndex));
                 return nullptr;
             }
 
-            GCPtr visitPushString(std::uint32_t index) {
+            boost::intrusive_ptr<Value> visitPushString(std::uint32_t index) {
                 stack.push(vm->string(*object, index));
                 return nullptr;
             }
 
-            GCPtr visitPushBoolean(std::uint8_t value) {
-                stack.push(value ? vm->true_() : vm->false_());
+            boost::intrusive_ptr<Value> visitPushBoolean(std::uint8_t value) {
+                stack.push(make<Boolean>(!!value));
                 return nullptr;
             }
 
-            GCPtr visitPushUnit() {
-                stack.push(vm->unit());
+            boost::intrusive_ptr<Value> visitPushUnit() {
+                stack.push(make<Unit>());
                 return nullptr;
             }
 
-            GCPtr visitPop() {
+            boost::intrusive_ptr<Value> visitPop() {
                 stack.pop();
                 return nullptr;
             }
 
-            GCPtr visitCall(std::uint32_t argc) {
-                std::vector<GCPtr> argv(argc);
+            boost::intrusive_ptr<Value> visitCall(std::uint32_t argc) {
+                std::vector<boost::intrusive_ptr<Value>> argv(argc);
                 for (decltype(argc) i = 0; i < argc; ++i) {
                     argv[i] = stack.top();
                     stack.pop();
@@ -61,16 +61,13 @@ namespace mill {
                 auto callee = stack.top();
                 stack.pop();
 
-                auto result =
-                    PrimitiveType<VM::Subroutine>::instance().get(callee)
-                    .implementation
-                    ->operator()(*vm, argc, argv.data());
+                auto result = dynamic_cast<Subroutine&>(*callee).value()(*vm, argc, argv.data());
                 stack.push(result);
 
                 return nullptr;
             }
 
-            GCPtr visitReturn() {
+            boost::intrusive_ptr<Value> visitReturn() {
                 return stack.top();
             }
 
@@ -78,12 +75,12 @@ namespace mill {
             VM* vm;
             Object const* object;
             ReaderSeeker* source;
-            std::stack<GCPtr> stack;
+            std::stack<boost::intrusive_ptr<Value>> stack;
         };
     }
 
     template<typename ReaderSeeker>
-    GCPtr interpret(VM& vm, Object const& object, ReaderSeeker& source) {
+    boost::intrusive_ptr<Value> interpret(VM& vm, Object const& object, ReaderSeeker& source) {
         detail::Interpreter<ReaderSeeker> interpreter(vm, object, source);
         return interpreter();
     }
