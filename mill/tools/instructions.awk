@@ -15,7 +15,7 @@ BEGIN {
 
 {
     print "#line " NR
-    printf "case %d: {\n", $1
+    printf "case %s: {\n", $1
 
     for (i = 3; i <= NF; i++) {
         printf "auto op%d = baka::read_integer<std::%s_t>(reader, baka::byte_order::little_endian);\n", i, $i;
@@ -32,7 +32,7 @@ BEGIN {
 }
 
 {
-    mnemonics[length(mnemonics) + 1] = $2
+    mnemonics[++nummnemonics] = $2
 }
 
 END {

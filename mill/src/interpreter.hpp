@@ -3,7 +3,6 @@
 #include <cstdint>
 #include "gc.hpp"
 #include "instructions.hpp"
-#include <llvm/ADT/SmallVector.h>
 #include "object.hpp"
 #include <stack>
 #include "value.hpp"
@@ -52,7 +51,7 @@ namespace mill {
             }
 
             GCPtr visitCall(std::uint32_t argc) {
-                llvm::SmallVector<GCPtr, 4> argv(argc);
+                std::vector<GCPtr> argv(argc);
                 for (decltype(argc) i = 0; i < argc; ++i) {
                     argv[i] = stack.top();
                     stack.pop();
