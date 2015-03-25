@@ -31,9 +31,9 @@ void mill::VM::loadObject(Object const& object) {
                 baka::io::memory_stream bodyReader;
                 bodyReader.write((char*)body.data(), (char*)body.data() + body.size());
                 bodyReader.seek_begin(0);
-                static_cast<Subroutine*>(subroutineGlobal.get())->value() = jitCompile(vm, object, bodyReader);
+                static_cast<Subroutine*>(subroutineGlobal.get())->value = jitCompile(vm, object, bodyReader);
                 // !!! From now on, we cannot reference any captured variables! !!!
-                return static_cast<Subroutine*>(subroutineGlobal.get())->value()(vm, argc, argv);
+                return static_cast<Subroutine*>(subroutineGlobal.get())->value(vm, argc, argv);
             } else {
                 baka::io::memory_stream bodyReader;
                 bodyReader.write((char*)body.data(), (char*)body.data() + body.size());
@@ -53,7 +53,7 @@ boost::intrusive_ptr<mill::Value> mill::VM::global(std::string const& name) cons
 }
 
 boost::intrusive_ptr<mill::Value> mill::VM::global(Object const& object, std::size_t nameIndex) const {
-    return global(static_cast<String const*>(strings.at(&object)[nameIndex].get())->value());
+    return global(static_cast<String const*>(strings.at(&object)[nameIndex].get())->value);
 }
 
 boost::intrusive_ptr<mill::Value> mill::VM::string(Object const& object, std::size_t index) const {

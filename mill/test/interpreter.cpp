@@ -38,15 +38,15 @@ TEST_CASE("interpreter works", "[Interpreter]") {
     {
         VM vm;
         vm.loadObject(object);
-        REQUIRE(dynamic_cast<Boolean&>(*interpret(vm, object, { 0x07, 0x01, 0x05 })).value());
-        REQUIRE(!dynamic_cast<Boolean&>(*interpret(vm, object, { 0x07, 0x00, 0x05 })).value());
+        REQUIRE(dynamic_cast<Boolean&>(*interpret(vm, object, { 0x07, 0x01, 0x05 })).value);
+        REQUIRE(!dynamic_cast<Boolean&>(*interpret(vm, object, { 0x07, 0x00, 0x05 })).value);
     }
 
     {
         VM vm;
         vm.loadObject(object);
-        REQUIRE(dynamic_cast<String&>(*interpret(vm, object, { 0x02, 0x00, 0x00, 0x00, 0x00, 0x05 })).value() == "foo");
-        REQUIRE(dynamic_cast<String&>(*interpret(vm, object, { 0x02, 0x01, 0x00, 0x00, 0x00, 0x05 })).value() == "bar");
+        REQUIRE(dynamic_cast<String&>(*interpret(vm, object, { 0x02, 0x00, 0x00, 0x00, 0x00, 0x05 })).value == "foo");
+        REQUIRE(dynamic_cast<String&>(*interpret(vm, object, { 0x02, 0x01, 0x00, 0x00, 0x00, 0x05 })).value == "bar");
     }
 
     {
@@ -68,6 +68,6 @@ TEST_CASE("interpreter works", "[Interpreter]") {
         }).get()));
         REQUIRE(argc == 2);
         REQUIRE(dynamic_cast<Unit*>(argv[0].get()));
-        REQUIRE(dynamic_cast<Boolean&>(*argv[1]).value());
+        REQUIRE(dynamic_cast<Boolean&>(*argv[1]).value);
     }
 }

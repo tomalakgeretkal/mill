@@ -28,12 +28,12 @@ int main(int argc, char const** argv) {
     VM vm;
     vm.loadObject(object);
     vm.setGlobal("std::io::writeln", make<Subroutine>([&] (VM&, std::size_t, boost::intrusive_ptr<Value>* argv) {
-        std::cout << dynamic_cast<String&>(*argv[0]).value() << '\n';
+        std::cout << dynamic_cast<String&>(*argv[0]).value << '\n';
         return make<Unit>();
     }));
 
     for (auto i = 0; i < 100; ++i) {
-        dynamic_cast<Subroutine&>(*vm.global("main::MAIN")).value()(vm, 0, nullptr);
+        dynamic_cast<Subroutine&>(*vm.global("main::MAIN")).value(vm, 0, nullptr);
     }
 
     return 0;

@@ -27,22 +27,13 @@ namespace mill {
     template<typename T>
     class CXXValue : public Value {
     public:
-        explicit CXXValue(T x) : x(std::move(x)) { }
+        explicit CXXValue(T value) : value(std::move(value)) { }
 
-        T& value() {
-            return x;
-        }
-
-        T const& value() const {
-            return x;
-        }
-
-    private:
-        T x;
+        T value;
     };
 
-    using Boolean = CXXValue<bool>;
-    using String = CXXValue<std::string>;
+    using Boolean = CXXValue<bool const>;
+    using String = CXXValue<std::string const>;
     using Subroutine = CXXValue<std::function<boost::intrusive_ptr<Value>(VM&, std::size_t, boost::intrusive_ptr<Value>*)>>;
 
     void retain(Value const&);

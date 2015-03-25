@@ -143,7 +143,7 @@ namespace mill {
                 }
                 va_end(args);
 
-                return callee.value()(vm, argc, argv.data()).get();
+                return callee.value(vm, argc, argv.data()).get();
             }
 
             llvm::Value* pointerLiteral(void const* ptr) {
