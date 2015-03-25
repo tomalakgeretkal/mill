@@ -12,10 +12,11 @@ Mill has a dynamic type system.
 
 The top type is a supertype of all types. The bottom type is a subtype of all
 types. There are no types that are strict supertypes of the top type and there
-are no types that are strict subtypes of the bottom type.
+are no types that are strict subtypes of the bottom type. There are no values
+of the bottom type.
 
-The bottom type is typically used as a return type for subroutines that never
-return.
+The bottom type is typically used as the return type for subroutines that never
+return, and as the exception specification for subroutines that never throw.
 
 =head3 Protocol Types
 
