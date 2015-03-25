@@ -1,0 +1,36 @@
+=head1 NAME
+
+milldata - Mill types and values
+
+=head1 DESCRIPTION
+
+Mill has a dynamic type system.
+
+=head2 Types
+
+=head3 The Top and Bottom Types
+
+The top type is a supertype of all types. The bottom type is a subtype of all
+types. There are no types that are strict supertypes of the top type and there
+are no types that are strict subtypes of the bottom type.
+
+The bottom type is typically used as a return type for subroutines that never
+return.
+
+=head3 Protocol Types
+
+A protocol type defines a set of subroutines which can be overloaded by a
+protocol implementation. A protocol implementation overloads these subroutines
+for some type, making that type a subtype of the protocol type.
+
+=head3 Structure Types
+
+A structure type defines a set of fields.
+
+=head2 Destruction
+
+When the reference count of a Mill value reaches zero, the C<destruct>
+procedure in the C<mill> module is invoked if it is overloaded for the type of
+the value. The value is passed as the argument to C<destruct>.
+
+=cut
