@@ -21,7 +21,7 @@ int main(int argc, char const** argv) {
     }
 
     baka::io::unique_fd objectFD(open(argv[1], O_RDONLY));
-    baka::io::file_stream<decltype(objectFD), baka::io::operation::read> objectReader(std::move(objectFD));
+    baka::io::file_stream<baka::io::unique_fd, baka::io::operation::read> objectReader(std::move(objectFD));
     auto object = readObject(objectReader);
 
     VM vm;

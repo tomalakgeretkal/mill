@@ -20,10 +20,7 @@ void mill::VM::loadObject(Object const& object) {
     }
 
     for (auto&& subroutine : object.subroutines) {
-        auto const& body =
-            std::find_if(object.subroutines.begin(), object.subroutines.end(),
-                         [&] (auto const& s) { return object.strings.at(s.name) == object.strings[subroutine.name]; })
-            ->body;
+        auto const& body = subroutine.body;
         auto& subroutineGlobal = globals[object.strings[object.name] + "::" + object.strings[subroutine.name]];
         subroutineGlobal = make<Subroutine>([this, callCount = std::make_shared<std::atomic<long>>(), &object, &body, &subroutineGlobal]
                                             (VM& vm, std::size_t argc, Value** argv) mutable {
