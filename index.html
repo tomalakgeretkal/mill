@@ -32,7 +32,7 @@ use std::shell (sh, stdout);
 MAIN {
     let greeting = "Hello";
     io::writeln([sh(capture: stdout)|
-        echo "#{greeting}, $(whoami)!"
+        echo "#{greeting}, $(whoami)"'!'
     |]);
 }</code></pre>
             </figure>
