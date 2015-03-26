@@ -1,0 +1,14 @@
+use std::io;
+
+proc hi() {
+    io::writeln("Hello, world!");
+}
+
+proc bye() {
+    io::writeln("Goodbye, world!");
+}
+
+MAIN {
+    hi();
+    bye();
+}
