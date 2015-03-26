@@ -1,0 +1,9 @@
+=head1 NAME
+
+milllayer - Layers in Mill
+
+=head1 DESCRIPTION
+
+Mill supports restricting module dependencies using layers.
+
+=cut

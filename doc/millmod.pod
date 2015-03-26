@@ -1,0 +1,7 @@
+=head1 NAME
+
+millmod - Modules in Mill
+
+=head1 DESCRIPTION
+
+=cut

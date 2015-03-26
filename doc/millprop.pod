@@ -1,0 +1,7 @@
+=head1 NAME
+
+millprop - Logic programming in Mill
+
+=head1 DESCRIPTION
+
+=cut

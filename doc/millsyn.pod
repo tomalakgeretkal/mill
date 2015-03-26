@@ -1,0 +1,9 @@
+=head1 NAME
+
+millsyn - Mill syntax
+
+=head1 DESCRIPTION
+
+Mill has a syntax.
+
+=cut
