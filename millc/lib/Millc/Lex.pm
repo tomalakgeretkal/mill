@@ -19,6 +19,7 @@ my @patterns = (
     [ qr/_/, 'underscore' ],
     [ qr/use/, 'use' ],
     [ qr/MAIN/, 'main' ],
+    [ qr/proc/, 'proc' ],
 
     [ qr/[a-zA-Z_][a-zA-Z0-9_]*/, 'identifier', sub { shift } ],
 );
