@@ -96,9 +96,13 @@ sub call_like_expr {
 sub call_expr {
     my $callee = primary_expr();
     expect('left_parenthesis');
-    my $argument = expr();
+    my @arguments = eval { try \&expr };
     expect('right_parenthesis');
-    { type => 'call_expr', callee => $callee, arguments => [$argument] };
+    {
+        type => 'call_expr',
+        callee => $callee,
+        arguments => [@arguments],
+    };
 }
 
 sub primary_expr {
@@ -106,10 +110,12 @@ sub primary_expr {
 }
 
 sub name_expr {
-    my $a = expect('identifier')->{value};
-    expect('colon_colon');
-    my $b = expect('identifier')->{value};
-    { type => 'name_expr', name => [$a, $b] };
+    my @xs = expect('identifier')->{value};
+    push @xs, @{many(sub {
+        expect('colon_colon');
+        expect('identifier')->{value};
+    })};
+    { type => 'name_expr', name => [@xs] };
 }
 
 sub string_expr {

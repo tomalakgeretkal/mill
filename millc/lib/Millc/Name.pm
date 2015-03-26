@@ -20,6 +20,15 @@ sub resolve {
             $ast;
         },
 
+        proc_decl => sub {
+            $symbols->{$ast->{name}} = {
+                type => 'module_member_symbol',
+                module => ['main'],
+                member => $ast->{name},
+            };
+            $ast;
+        },
+
         main_decl => sub {
             ({ %$ast, body => resolve($ast->{body}, { %$symbols }) });
         },
@@ -33,17 +42,33 @@ sub resolve {
         },
 
         name_expr => sub {
-            my ($base, $member) = @{$ast->{name}};
-            my $symbol = $symbols->{$base};
-            die "name $base not in scope" if !$symbol;
-            ({
-                %$ast,
-                name => {
-                    type => 'module_member',
-                    module => $symbol->{module},
-                    member => $member,
-                },
-            });
+            my @name = @{$ast->{name}};
+            if (@name == 1) {
+                my $symbol = $symbols->{$name[0]};
+                die "name $name[0] not in scope" if !$symbol;
+                ({
+                    %$ast,
+                    name => {
+                        type => 'module_member',
+                        module => ['main'],
+                        member => $name[0],
+                    },
+                });
+            } elsif (@name == 2) {
+                my ($base, $member) = @{$ast->{name}};
+                my $symbol = $symbols->{$base};
+                die "name $base not in scope" if !$symbol;
+                ({
+                    %$ast,
+                    name => {
+                        type => 'module_member',
+                        module => $symbol->{module},
+                        member => $member,
+                    },
+                });
+            } else {
+                ...
+            }
         },
 
         string_expr => sub {
