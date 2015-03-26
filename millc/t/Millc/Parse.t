@@ -6,6 +6,8 @@ use Test::More tests => 1;
 my $hello_world = <<EOC;
 use std::io;
 
+proc f() { }
+
 MAIN {
     io::writeln("Hello, world!");
 }
@@ -15,6 +17,11 @@ is_deeply(parse([lex($hello_world)]), {
     type => 'module',
     decls => [
         { type => 'use_decl', module => ['std', 'io'] },
+        {
+            type => 'proc_decl',
+            name => 'f',
+            body => { type => 'block_expr', stmts => [] },
+        },
         {
             type => 'main_decl',
             body => {

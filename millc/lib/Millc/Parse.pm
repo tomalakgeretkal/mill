@@ -58,7 +58,7 @@ sub one_of {
 }
 
 sub decl {
-    one_of(\&use_decl, \&main_decl);
+    one_of(\&use_decl, \&proc_decl, \&main_decl);
 }
 
 sub use_decl {
@@ -68,6 +68,15 @@ sub use_decl {
     my $b = expect('identifier')->{value};
     expect('semicolon');
     { type => 'use_decl', module => [$a, $b] };
+}
+
+sub proc_decl {
+    expect('proc');
+    my $name = expect('identifier')->{value};
+    expect('left_parenthesis');
+    expect('right_parenthesis');
+    my $body = block_expr();
+    { type => 'proc_decl', name => $name, body => $body };
 }
 
 sub main_decl {
