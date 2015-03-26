@@ -34,7 +34,7 @@ namespace mill {
 
     using Boolean = CXXValue<bool const>;
     using String = CXXValue<std::string const>;
-    using Subroutine = CXXValue<std::function<boost::intrusive_ptr<Value>(VM&, std::size_t, boost::intrusive_ptr<Value>*)>>;
+    using Subroutine = CXXValue<std::function<boost::intrusive_ptr<Value>(VM&, std::size_t, Value**)>>;
 
     void retain(Value const&);
     void release(Value const&);

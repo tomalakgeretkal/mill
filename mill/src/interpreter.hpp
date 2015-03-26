@@ -51,9 +51,11 @@ namespace mill {
             }
 
             boost::intrusive_ptr<Value> visitCall(std::uint32_t argc) {
-                std::vector<boost::intrusive_ptr<Value>> argv(argc);
+                std::vector<boost::intrusive_ptr<Value>> argvRefs(argc);
+                std::vector<Value*> argv(argc);
                 for (decltype(argc) i = 0; i < argc; ++i) {
-                    argv[i] = stack.top();
+                    argvRefs[i] = stack.top();
+                    argv[i] = stack.top().get();
                     stack.pop();
                 }
                 std::reverse(argv.begin(), argv.end());

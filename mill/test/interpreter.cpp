@@ -53,7 +53,7 @@ TEST_CASE("interpreter works", "[Interpreter]") {
         VM vm;
         std::size_t argc;
         std::vector<boost::intrusive_ptr<Value>> argv;
-        vm.setGlobal("foo", make<Subroutine>([&] (VM&, std::size_t argc_, boost::intrusive_ptr<Value>* argv_) {
+        vm.setGlobal("foo", make<Subroutine>([&] (VM&, std::size_t argc_, Value** argv_) {
             argc = argc_;
             std::copy(argv_, argv_ + argc_, std::back_inserter(argv));
             return make<Unit>();

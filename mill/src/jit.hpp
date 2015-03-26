@@ -136,7 +136,7 @@ namespace mill {
                 auto& vm = *static_cast<VM*>(vvm);
 
                 auto argc = static_cast<std::size_t>(vargc);
-                std::vector<boost::intrusive_ptr<Value>> argv(argc);
+                std::vector<Value*> argv(argc);
                 va_list args; va_start(args, vargc);
                 for (decltype(argc) i = 0; i < argc; ++i) {
                     argv[i] = static_cast<Value*>(va_arg(args, void*));
@@ -167,12 +167,8 @@ namespace mill {
         auto llvmPointer = jitCompiler();
 
         auto functionPointer = reinterpret_cast<void*(*)(void*, std::uint64_t, void**)>(engine->getPointerToFunction(llvmPointer));
-        return [=] (VM& vm, std::size_t argc, boost::intrusive_ptr<Value>* argv) -> boost::intrusive_ptr<Value> {
-            std::vector<void*> vargv(argc);
-            for (decltype(argc) i = 0; i < argc; ++i) {
-                vargv[i] = argv[i].get();
-            }
-            return static_cast<Value*>(functionPointer(&vm, argc, vargv.data()));
+        return [=] (VM& vm, std::size_t argc, Value** argv) -> boost::intrusive_ptr<Value> {
+            return static_cast<Value*>(functionPointer(&vm, argc, reinterpret_cast<void**>(argv)));
         };
     }
 }

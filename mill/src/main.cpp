@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <baka/io/file_descriptor.hpp>
 #include <baka/io/file_stream.hpp>
-#include <boost/intrusive_ptr.hpp>
 #include <cstddef>
 #include <fcntl.h>
 #include "interpreter.hpp"
@@ -27,7 +26,7 @@ int main(int argc, char const** argv) {
 
     VM vm;
     vm.loadObject(object);
-    vm.setGlobal("std::io::writeln", make<Subroutine>([&] (VM&, std::size_t, boost::intrusive_ptr<Value>* argv) {
+    vm.setGlobal("std::io::writeln", make<Subroutine>([&] (VM&, std::size_t, Value** argv) {
         std::cout << dynamic_cast<String&>(*argv[0]).value << '\n';
         return make<Unit>();
     }));
