@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mill</title>
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic">
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="mill.css">
+</head>
+<body>
+    <div class="mill-container">
+        <header class="mill-header">
+            <h1>Mill</h1>
+        </header>
+        <section class="mill-home-banner">
+            <div class="mill-home-banner-description">
+                <p>
+                    Mill is a general-purpose programming language with supreme
+                    support for specification, concurrency and language
+                    interoperability.
+                </p>
+                <p>
+                    Remarkable features include layers, protocols and
+                    quasi-literals.
+                </p>
+            </div>
+            <figure class="mill-home-banner-hello-world">
+                <pre><code>use std::io;
+use std::shell (sh, stdout);
+
+MAIN {
+    let greeting = "Hello";
+    io::writeln([sh(capture: stdout)|
+        echo "#{greeting}, $(whoami)!"
+    |]);
+}</code></pre>
+            </figure>
+        </section>
+        <section class="mill-content">
+            <p>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                Vivamus vitae euismod est, sed lacinia velit. Suspendisse
+                aliquet mattis arcu, eu interdum quam tincidunt vel. Nullam leo
+                quam, tincidunt in urna nec, hendrerit pulvinar nulla. Vivamus
+                tristique, quam at efficitur egestas, arcu elit cursus elit,
+                eget varius nulla metus id ligula. Suspendisse facilisis
+                aliquam enim, a fringilla mi egestas vel. Etiam pretium, quam
+                sed dapibus consequat, dolor elit mollis quam, at posuere metus
+                quam nec nibh. Cras ultricies ornare tortor, sit amet feugiat
+                eros vulputate nec.
+            </p>
+            <p>
+                Praesent in mauris at augue euismod consequat ut quis turpis.
+                Sed et dui rutrum, aliquam nibh non, egestas magna. Fusce
+                condimentum velit vitae nibh egestas, ac maximus odio lobortis.
+                Proin viverra sem sapien, non placerat magna ullamcorper et.
+                Cras elementum magna non scelerisque maximus. Cum sociis
+                natoque penatibus et magnis dis parturient montes, nascetur
+                ridiculus mus. Vestibulum ante ipsum primis in faucibus orci
+                luctus et ultrices posuere cubilia Curae; Cras interdum gravida
+                quam id scelerisque. Nunc felis massa, lacinia vel purus
+                luctus, tristique scelerisque metus. Mauris iaculis sapien ac
+                leo dapibus ornare. Quisque laoreet condimentum lobortis.
+                Mauris erat felis, cursus sed arcu nec, pharetra facilisis dui.
+                Cras luctus pretium placerat. Sed placerat vel justo non
+                facilisis. Praesent aliquet velit et tortor posuere, id cursus
+                ex vestibulum. Nulla sollicitudin ex ex, vehicula rutrum nisi
+                accumsan at.
+            </p>
+            <p>
+                Cras maximus commodo justo, et accumsan nisi dignissim vel.
+                Donec imperdiet, arcu in vehicula facilisis, ante lacus
+                imperdiet ex, non faucibus sapien velit sed velit. Cras mattis
+                ante sit amet sem semper ultricies. Proin iaculis est non lacus
+                porttitor, finibus mollis ex malesuada. Integer tempus ut ipsum
+                id ullamcorper. Ut malesuada ultrices ultricies. Etiam ut
+                efficitur ante.
+            </p>
+        </section>
+        <footer class="mill-footer">
+            <p class="mill-copyright">&copy; 2015 rightfold.</p>
+        </footer>
+    </div>
+</body>
+</html>

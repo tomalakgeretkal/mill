@@ -1,0 +1,90 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Lora, Times, serif;
+    font-size: 14px;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1 {
+    font-size: 24px;
+    line-height: 36px;
+}
+
+p, pre {
+    line-height: 18px;
+}
+
+p + p {
+    margin-top: 18px;
+}
+
+pre {
+    background: #fff;
+    border: solid 1px #dad6dc;
+    border-radius: 4px;
+    padding: 18px;
+}
+
+code {
+    font-size: 14px;
+    font-family: monospace;
+}
+
+.mill-container {
+    margin: auto;
+    max-width: 800px;
+}
+
+.mill-header {
+    border-top: solid 4px #fcf8fe;
+    padding: 18px;
+}
+
+.mill-footer {
+    border-bottom: solid 4px #fcf8fe;
+    border-top: solid 4px #fcf8fe;
+    padding: 18px;
+}
+
+.mill-content {
+    padding: 18px;
+}
+
+.mill-home-banner {
+    background: #fcf8fe;
+    padding: 18px;
+    text-shadow: 0 1px 0 #fff;
+}
+
+@media screen and (max-width: 400px) {
+    .mill-home-banner-hello-world {
+        display: none;
+    }
+}
+
+@media screen and (min-width: 400px) and (max-width: 800px) {
+    .mill-home-banner-description {
+        margin-bottom: 18px;
+    }
+}
+
+@media screen and (min-width: 800px) {
+    .mill-home-banner {
+        display: flex;
+    }
+
+    .mill-home-banner-description {
+        flex: 1;
+        font-size: 16px;
+        margin-right: 9px;
+    }
+
+    .mill-home-banner-hello-world {
+        flex: 1;
+        margin-left: 9px;
+    }
+}
