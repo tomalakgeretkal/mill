@@ -22,6 +22,7 @@ sub codegen_decl {
     my $decl = shift;
     my %codegens = (
         use_decl => \&codegen_use_decl,
+        proc_decl => \&codegen_proc_decl,
         main_decl => \&codegen_main_decl,
     );
     $codegens{$decl->{type}}->($decl);
@@ -29,6 +30,18 @@ sub codegen_decl {
 
 sub codegen_use_decl {
     $object_builder->dependency(join('::', @{shift->{module}}));
+}
+
+sub codegen_proc_decl {
+    my $proc_decl = shift;
+    my $body = '';
+    open my $fh, '>:raw', \$body;
+    local $bytecode_builder = $bytecode_builder_factory->new($fh);
+    codegen_expr($proc_decl->{body});
+    $bytecode_builder->pop();
+    $bytecode_builder->push_unit();
+    $bytecode_builder->return();
+    $object_builder->subroutine($proc_decl->{name}, 0, $body);
 }
 
 sub codegen_main_decl {

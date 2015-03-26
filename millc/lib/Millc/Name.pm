@@ -26,7 +26,7 @@ sub resolve {
                 module => ['main'],
                 member => $ast->{name},
             };
-            $ast;
+            ({ %$ast, body => resolve($ast->{body}, { %$symbols }) });
         },
 
         main_decl => sub {
