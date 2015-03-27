@@ -34,7 +34,28 @@ namespace mill {
 
     using Boolean = CXXValue<bool const>;
     using String = CXXValue<std::string const>;
-    using Subroutine = CXXValue<std::function<boost::intrusive_ptr<Value>(VM&, std::size_t, Value**)>>;
+
+    class Subroutine : public Value {
+    public:
+        template<typename F>
+        explicit Subroutine(F slow)
+            : slow(std::move(slow)), fast(), fastAvailable(false) { }
+
+        Subroutine(Subroutine const&) = delete;
+        Subroutine& operator=(Subroutine const&) = delete;
+
+        boost::intrusive_ptr<Value> operator()(VM& vm, std::size_t argc, Value** argv) {
+            if (fastAvailable) {
+                return fast(vm, argc, argv);
+            } else {
+                return slow(vm, argc, argv);
+            }
+        }
+
+        std::function<boost::intrusive_ptr<Value>(VM&, std::size_t, Value**)> slow;
+        std::function<boost::intrusive_ptr<Value>(VM&, std::size_t, Value**)> fast;
+        std::atomic<bool> fastAvailable;
+    };
 
     void retain(Value const&);
     void release(Value const&);

@@ -63,7 +63,7 @@ namespace mill {
                 auto callee = stack.top();
                 stack.pop();
 
-                auto result = dynamic_cast<Subroutine&>(*callee).value(*vm, argc, argv.data());
+                auto result = dynamic_cast<Subroutine&>(*callee)(*vm, argc, argv.data());
                 stack.push(result);
 
                 return nullptr;

@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+#include <baka/io/io_error.hpp>
 #include <boost/intrusive_ptr.hpp>
 #include <cstdarg>
 #include <cstdint>
@@ -20,6 +21,7 @@
 #include <mutex>
 #include "object.hpp"
 #include <stack>
+#include <string>
 #include <vector>
 #include "value.hpp"
 #include "vm.hpp"
@@ -34,7 +36,7 @@ namespace mill {
 
             llvm::Function* operator()() {
                 auto functionConstant = module->getOrInsertFunction(
-                    "main",
+                    std::to_string(uniqueID()),
                     valueType(),
                     llvm::Type::getInt8PtrTy(*ctx),
                     llvm::Type::getInt64Ty(*ctx),
@@ -46,12 +48,11 @@ namespace mill {
                 auto entry = llvm::BasicBlock::Create(*ctx, "", function);
                 builder.SetInsertPoint(entry);
 
-                readInstruction(*source, *this);
-                readInstruction(*source, *this);
-                readInstruction(*source, *this);
-                readInstruction(*source, *this);
-                readInstruction(*source, *this);
-                readInstruction(*source, *this);
+                try {
+                    for (;;) {
+                        readInstruction(*source, *this);
+                    }
+                } catch (baka::io::eof_error const&) { }
 
                 return function;
             }
@@ -132,6 +133,13 @@ namespace mill {
             ReaderSeeker* source;
             std::stack<llvm::Value*> stack;
 
+            static auto uniqueID() {
+                static std::uintmax_t id = 0;
+                static std::mutex mutex;
+                std::lock_guard<decltype(mutex)> lock(mutex);
+                return ++id;
+            }
+
             static void* callThunk(void* vcallee, void* vvm, std::uint64_t vargc, ...) {
                 auto& callee = dynamic_cast<Subroutine&>(*static_cast<Value*>(vcallee));
                 auto& vm = *static_cast<VM*>(vvm);
@@ -144,7 +152,7 @@ namespace mill {
                 }
                 va_end(args);
 
-                return callee.value(vm, argc, argv.data()).get();
+                return callee(vm, argc, argv.data()).get();
             }
 
             llvm::Value* pointerLiteral(void const* ptr) {

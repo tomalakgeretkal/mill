@@ -29,9 +29,12 @@ void mill::VM::loadObject(Object const& object) {
                 baka::io::memory_stream bodyReader;
                 bodyReader.write((char*)body.data(), (char*)body.data() + body.size());
                 bodyReader.seek_begin(0);
-                static_cast<Subroutine*>(subroutineGlobal.get())->value = jitCompile(vm, object, bodyReader);
-                // !!! From now on, we cannot reference any captured variables! !!!
-                return static_cast<Subroutine*>(subroutineGlobal.get())->value(vm, argc, argv);
+
+                auto& subroutineValue = *static_cast<Subroutine*>(subroutineGlobal.get());
+                subroutineValue.fast = jitCompile(vm, object, bodyReader);
+                subroutineValue.fastAvailable = true;
+
+                return subroutineValue.fast(vm, argc, argv);
             } else {
                 baka::io::memory_stream bodyReader;
                 bodyReader.write((char*)body.data(), (char*)body.data() + body.size());
@@ -60,7 +63,7 @@ boost::intrusive_ptr<mill::Value> mill::VM::string(Object const& object, std::si
 
 std::future<boost::intrusive_ptr<mill::Value>> mill::VM::call(Value* value, std::size_t argc, Value** argv) {
     std::packaged_task<boost::intrusive_ptr<mill::Value>()> task([=] {
-        return dynamic_cast<Subroutine&>(*value).value(*this, argc, argv);
+        return dynamic_cast<Subroutine&>(*value)(*this, argc, argv);
     });
     auto result = task.get_future();
     threadPool.post(std::move(task));
