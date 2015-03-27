@@ -24,13 +24,13 @@
                     Remarkable features include layers, protocols and
                     quasi-literals.
                 </p>
+                <a class="mill-home-banner-link" href="https://github.com/mill-lang/mill">Check it Out!</a>
             </div>
             <figure class="mill-home-banner-hello-world">
                 <pre><code>use std::io;
 use std::shell (sh, stdout);
 
-MAIN {
-    let greeting = "Hello";
+proc greet(greeting: String) {
     io::writeln([sh(capture: stdout)|
         echo "#{greeting}, $(whoami)"'!'
     |]);

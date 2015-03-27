@@ -24,8 +24,6 @@ p + p {
 
 pre {
     background: #fff;
-    border: solid 1px #dad6dc;
-    border-radius: 4px;
     padding: 18px;
 }
 
@@ -58,6 +56,25 @@ code {
     background: #fcf8fe;
     padding: 18px;
     text-shadow: 0 1px 0 #fff;
+}
+
+.mill-home-banner-link {
+    background: #fcd8fe;
+    color: #000;
+    display: block;
+    line-height: 18px;
+    margin-top: 18px;
+    padding: 18px;
+    text-align: center;
+    text-decoration: none;
+}
+
+.mill-home-banner-link:hover {
+    background: #ecc8ee;
+}
+
+.mill-home-banner-link:active {
+    background: #dcb8de;
 }
 
 @media screen and (max-width: 400px) {
