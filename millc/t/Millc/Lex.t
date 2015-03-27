@@ -4,6 +4,14 @@ use Modern::Perl;
 use Test::More tests => 1;
 
 my $hello_world = <<EOC;
+#!foo
+#(
+bar
+baz
+)
+#
+#()
+
 use std::io;
 
 proc f() { }

@@ -28,7 +28,8 @@ sub lex {
     my $code = shift;
     my @tokens;
     token: while ($code ne '') {
-        $code =~ s/^[ \n]+|[ \n]+$//g;
+        my $space = qr/[ \n]|#\(.*?\)|#.*?\n/s;
+        $code =~ s/^$space+|$space+$//gs;
         for (@patterns) {
             my ($pattern, $type, $value) = @$_;
             if ($code =~ /^$pattern/) {

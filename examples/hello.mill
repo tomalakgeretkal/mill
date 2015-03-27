@@ -1,3 +1,9 @@
+#!/usr/bin/env runmill
+#(
+A simple program which when invoked greets the world. It demonstrates the
+std::io module and MAIN blocks.
+)
+
 use std::io;
 
 MAIN {
