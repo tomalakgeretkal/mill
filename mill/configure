@@ -26,6 +26,7 @@ w.variable('cxxflags', (os.environ.get('CXXFLAGS', '') + '''
     -isystem ''' + llvm_config('--includedir') + '''
     -D__STDC_LIMIT_MACROS
     -D__STDC_CONSTANT_MACROS
+    -fcolor-diagnostics
     -g
 ''').replace('\n', ' '))
 w.variable('ldflags', ('''
