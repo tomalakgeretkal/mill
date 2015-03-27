@@ -52,9 +52,12 @@ namespace mill {
             }
         }
 
+    private:
         std::function<boost::intrusive_ptr<Value>(VM&, std::size_t, Value**)> slow;
         std::function<boost::intrusive_ptr<Value>(VM&, std::size_t, Value**)> fast;
         std::atomic<bool> fastAvailable;
+
+        friend class VM;
     };
 
     void retain(Value const&);
