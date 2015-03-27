@@ -17,6 +17,7 @@
 #include <llvm/IR/Value.h>
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/TargetSelect.h>
+#include <mutex>
 #include "object.hpp"
 #include <stack>
 #include <vector>
@@ -162,6 +163,8 @@ namespace mill {
         static llvm::LLVMContext ctx;
         static auto module = new llvm::Module("main", ctx);
         static auto engine = (llvm::InitializeNativeTarget(), llvm::EngineBuilder(module).create());
+        static std::mutex mutex;
+        std::lock_guard<decltype(mutex)> lock(mutex);
 
         detail::JITCompiler<ReaderSeeker> jitCompiler(vm, object, ctx, *module, source);
         auto llvmPointer = jitCompiler();

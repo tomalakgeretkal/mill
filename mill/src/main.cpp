@@ -3,13 +3,16 @@
 #include <baka/io/file_stream.hpp>
 #include <cstddef>
 #include <fcntl.h>
+#include <future>
 #include "interpreter.hpp"
 #include <iostream>
+#include <mutex>
 #include "object.hpp"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <utility>
 #include "value.hpp"
+#include <vector>
 #include "vm.hpp"
 
 using namespace mill;
@@ -26,13 +29,20 @@ int main(int argc, char const** argv) {
 
     VM vm;
     vm.loadObject(object);
+
+    std::mutex coutMutex;
     vm.setGlobal("std::io::writeln", make<Subroutine>([&] (VM&, std::size_t, Value** argv) {
+        std::lock_guard<decltype(coutMutex)> lock(coutMutex);
         std::cout << dynamic_cast<String&>(*argv[0]).value << '\n';
         return make<Unit>();
     }));
 
+    std::vector<std::future<boost::intrusive_ptr<Value>>> results;
     for (auto i = 0; i < 100; ++i) {
-        dynamic_cast<Subroutine&>(*vm.global("main::MAIN")).value(vm, 0, nullptr);
+        results.push_back(vm.call(vm.global("main::MAIN").get(), 0, nullptr));
+    }
+    for (auto&& result : results) {
+        result.get();
     }
 
     return 0;

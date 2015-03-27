@@ -1,6 +1,7 @@
 #include <atomic>
 #include <baka/io/memory_stream.hpp>
 #include <boost/intrusive_ptr.hpp>
+#include <future>
 #include "interpreter.hpp"
 #include "jit.hpp"
 #include <memory>
@@ -55,4 +56,13 @@ boost::intrusive_ptr<mill::Value> mill::VM::global(Object const& object, std::si
 
 boost::intrusive_ptr<mill::Value> mill::VM::string(Object const& object, std::size_t index) const {
     return strings.at(&object)[index];
+}
+
+std::future<boost::intrusive_ptr<mill::Value>> mill::VM::call(Value* value, std::size_t argc, Value** argv) {
+    std::packaged_task<boost::intrusive_ptr<mill::Value>()> task([=] {
+        return dynamic_cast<Subroutine&>(*value).value(*this, argc, argv);
+    });
+    auto result = task.get_future();
+    threadPool.post(std::move(task));
+    return result;
 }
