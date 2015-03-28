@@ -9,7 +9,9 @@ use Test::More tests => 1;
 my $hello_world = <<EOC;
 use std::io;
 
-proc f(x: String) { }
+proc f(x: String) {
+    io::writeln(x);
+}
 
 MAIN {
     f();
@@ -39,7 +41,31 @@ eq_or_diff(resolve(parse([lex($hello_world)])), {
             ],
             body => {
                 type => 'block_expr',
-                stmts => [],
+                stmts => [
+                    {
+                        type => 'expr_stmt',
+                        expr => {
+                            type => 'call_expr',
+                            callee => {
+                                type => 'name_expr',
+                                name => {
+                                   type => 'module_member',
+                                   module => ['std', 'io'],
+                                   member => 'writeln',
+                               },
+                            },
+                            arguments => [
+                                {
+                                    type => 'name_expr',
+                                    name => {
+                                        type => 'parameter',
+                                        name => 'x',
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
             },
         },
         {

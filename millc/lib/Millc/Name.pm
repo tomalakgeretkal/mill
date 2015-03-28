@@ -32,6 +32,12 @@ sub resolve {
                 module => ['main'],
                 member => $ast->{name},
             };
+            my %body_symbols = (
+                %$symbols,
+                (map {
+                    ($_->{name} => { type => 'parameter_symbol', name => $_->{name} });
+                } @{$ast->{params}}),
+            );
             return {
                 %$ast,
                 params => [map {
@@ -40,7 +46,7 @@ sub resolve {
                         type => resolve($_->{type}, { %$symbols }),
                     };
                 } @{$ast->{params}}],
-                body => resolve($ast->{body}, { %$symbols }),
+                body => resolve($ast->{body}, { %body_symbols }),
             };
         },
 
@@ -61,14 +67,26 @@ sub resolve {
             if (@name == 1) {
                 my $symbol = $symbols->{$name[0]};
                 die "name $name[0] not in scope" if !$symbol;
-                ({
-                    %$ast,
-                    name => {
-                        type => 'module_member',
-                        module => $symbol->{module},
-                        member => $name[0],
-                    },
-                });
+                if ($symbol->{type} eq 'module_member_symbol') {
+                    return {
+                        %$ast,
+                        name => {
+                            type => 'module_member',
+                            module => $symbol->{module},
+                            member => $symbol->{member},
+                        },
+                    };
+                } elsif ($symbol->{type} eq 'parameter_symbol') {
+                    return {
+                        %$ast,
+                        name => {
+                            type => 'parameter',
+                            name => $symbol->{name},
+                        },
+                    };
+                } else {
+                    ...
+                }
             } elsif (@name == 2) {
                 my ($base, $member) = @{$ast->{name}};
                 my $symbol = $symbols->{$base};
