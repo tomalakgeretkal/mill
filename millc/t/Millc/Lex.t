@@ -11,14 +11,20 @@ baz
 )
 #
 #()
+#(#(#(()(()))))
+#(hello #(world) !)
 
+##(
 use std::io;
+#)
 
 proc f() { }
 
 MAIN {
     io::writeln("Hello, world!");
 }
+
+#()
 EOC
 
 is_deeply([lex($hello_world)], [
@@ -45,4 +51,6 @@ is_deeply([lex($hello_world)], [
     { type => 'right_parenthesis' },
     { type => 'semicolon' },
     { type => 'right_brace' },
+
+    { type => 'eof' },
 ]);

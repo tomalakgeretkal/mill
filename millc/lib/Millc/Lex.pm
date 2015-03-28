@@ -22,14 +22,16 @@ my @patterns = (
     [ qr/proc/, 'proc' ],
 
     [ qr/[a-zA-Z_][a-zA-Z0-9_]*/, 'identifier', sub { shift } ],
+
+    [ qr/\z/, 'eof' ],
 );
 
 sub lex {
     my $code = shift;
     my @tokens;
     token: while ($code ne '') {
-        my $space = qr/[ \n]|#\(.*?\)|#.*?\n/s;
-        $code =~ s/^$space+|$space+$//gs;
+        my $space = qr/[ \n]|#(\((?:(?-1)|.)*?\))|#.*?\n/s;
+        $code =~ s/^$space+//s;
         for (@patterns) {
             my ($pattern, $type, $value) = @$_;
             if ($code =~ /^$pattern/) {

@@ -142,7 +142,6 @@ sub expr_stmt {
 
 sub parse {
     my @tokens = @{shift()};
-    push @tokens, { type => 'eof' };
     my @decls = with_tokens \@tokens, sub {
         my $result = many(\&decl);
         expect('eof');
