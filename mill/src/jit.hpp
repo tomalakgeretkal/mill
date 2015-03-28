@@ -59,11 +59,13 @@ namespace mill {
             void visitPushGlobal(std::uint32_t nameIndex) {
                 auto ptr = vm->global(*object, nameIndex).get();
                 stack.push_back(pointerLiteral(ptr));
+                emitRetain(stack.back());
             }
 
             void visitPushString(std::uint32_t index) {
                 auto ptr = vm->string(*object, index).get();
                 stack.push_back(pointerLiteral(ptr));
+                emitRetain(stack.back());
             }
 
             void visitPushBoolean(std::uint8_t) {
@@ -74,14 +76,20 @@ namespace mill {
                 auto unit = make<Unit>();
                 retain(*unit); // TODO: Fix memory leak.
                 stack.push_back(pointerLiteral(unit.get()));
+                emitRetain(stack.back());
             }
 
             void visitPushParameter(std::uint32_t index) {
                 auto argv = &*++++function->getArgumentList().begin();
-                stack.push_back(builder.CreateGEP(argv, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(*ctx), index)}));
+                auto argPtr = builder.CreateGEP(argv, {
+                    llvm::ConstantInt::get(llvm::Type::getInt64Ty(*ctx), index)
+                });
+                stack.push_back(builder.CreateLoad(argPtr));
+                emitRetain(stack.back());
             }
 
             void visitPop() {
+                emitRelease(stack.back());
                 stack.pop_back();
             }
 
@@ -99,6 +107,7 @@ namespace mill {
                 std::reverse(argv.begin(), argv.end());
 
                 auto callee = stack.back();
+                emitRetain(stack.back());
                 stack.pop_back();
 
                 auto llvmThunkI8Ptr = pointerLiteral(reinterpret_cast<void*>(callThunk));
@@ -126,6 +135,11 @@ namespace mill {
                     llvmArgv.push_back(arg);
                 }
                 stack.push_back(builder.CreateCall(llvmThunkPtr, llvmArgv));
+
+                for (auto&& arg : argv) {
+                    emitRelease(arg);
+                }
+                emitRelease(callee);
             }
 
             void visitReturn() {
@@ -162,16 +176,40 @@ namespace mill {
                 }
                 va_end(args);
 
-                return callee(vm, argc, argv.data()).get();
+                auto result = callee(vm, argc, argv.data());
+                retain(*result.get());
+                return result.get();
             }
 
-            llvm::Value* pointerLiteral(void const* ptr) {
+            template<typename T>
+            llvm::Value* pointerLiteral(T const* ptr) {
+                return pointerLiteral(ptr, valueType());
+            }
+
+            template<typename T>
+            llvm::Value* pointerLiteral(T const* ptr, llvm::Type* type) {
                 auto llvmI64Ptr = llvm::ConstantInt::get(llvm::Type::getInt64Ty(*ctx), (std::uint64_t)ptr);
-                return llvm::ConstantExpr::getIntToPtr(llvmI64Ptr, valueType());
+                return llvm::ConstantExpr::getIntToPtr(llvmI64Ptr, type);
             }
 
             llvm::Type* valueType() {
                 return llvm::Type::getInt8PtrTy(*ctx);
+            }
+
+            void emitRetain(llvm::Value* value) {
+                auto retainPtr = pointerLiteral(
+                    +[] (void* v) { retain(*static_cast<Value*>(v)); },
+                    llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getVoidTy(*ctx), {valueType()}, false))
+                );
+                builder.CreateCall(retainPtr, value);
+            }
+
+            void emitRelease(llvm::Value* value) {
+                auto releasePtr = pointerLiteral(
+                    +[] (void* v) { release(*static_cast<Value*>(v)); },
+                    llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getVoidTy(*ctx), {valueType()}, false))
+                );
+                builder.CreateCall(releasePtr, value);
             }
         };
     }
