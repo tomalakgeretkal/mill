@@ -6,7 +6,13 @@ our @EXPORT_OK = 'resolve';
 
 sub resolve {
     my ($ast, $symbols) = @_;
-    $symbols //= {};
+    $symbols //= {
+        'String' => {
+            type => 'module_member_symbol',
+            module => ['std', 'always'],
+            member => 'String',
+        },
+    };
     my %visitors = (
         module => sub {
             ({ %$ast, decls => [map { resolve($_, $symbols) } @{$ast->{decls}}] });
@@ -26,7 +32,16 @@ sub resolve {
                 module => ['main'],
                 member => $ast->{name},
             };
-            ({ %$ast, body => resolve($ast->{body}, { %$symbols }) });
+            return {
+                %$ast,
+                params => [map {
+                    {
+                        name => $_->{name},
+                        type => resolve($_->{type}, { %$symbols }),
+                    };
+                } @{$ast->{params}}],
+                body => resolve($ast->{body}, { %$symbols }),
+            };
         },
 
         main_decl => sub {
@@ -50,7 +65,7 @@ sub resolve {
                     %$ast,
                     name => {
                         type => 'module_member',
-                        module => ['main'],
+                        module => $symbol->{module},
                         member => $name[0],
                     },
                 });
