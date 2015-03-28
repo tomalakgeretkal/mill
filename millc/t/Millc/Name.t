@@ -59,7 +59,7 @@ eq_or_diff(resolve(parse([lex($hello_world)])), {
                                     type => 'name_expr',
                                     name => {
                                         type => 'parameter',
-                                        name => 'x',
+                                        index => 0,
                                     },
                                 },
                             ],

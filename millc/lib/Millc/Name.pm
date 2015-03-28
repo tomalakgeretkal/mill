@@ -32,12 +32,13 @@ sub resolve {
                 module => ['main'],
                 member => $ast->{name},
             };
-            my %body_symbols = (
-                %$symbols,
-                (map {
-                    ($_->{name} => { type => 'parameter_symbol', name => $_->{name} });
-                } @{$ast->{params}}),
-            );
+            my %body_symbols = %$symbols;
+            for (0..$#{$ast->{params}}) {
+                $body_symbols{$ast->{params}->[$_]->{name}} = {
+                    type => 'parameter_symbol',
+                    index => $_,
+                };
+            }
             return {
                 %$ast,
                 params => [map {
@@ -81,7 +82,7 @@ sub resolve {
                         %$ast,
                         name => {
                             type => 'parameter',
-                            name => $symbol->{name},
+                            index => $symbol->{index},
                         },
                     };
                 } else {

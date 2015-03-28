@@ -41,7 +41,11 @@ sub codegen_proc_decl {
     $bytecode_builder->pop();
     $bytecode_builder->push_unit();
     $bytecode_builder->return();
-    $object_builder->subroutine($proc_decl->{name}, 0, $body);
+    $object_builder->subroutine(
+        $proc_decl->{name},
+        scalar @{$proc_decl->{params}},
+        $body,
+    );
 }
 
 sub codegen_main_decl {
@@ -77,9 +81,15 @@ sub codegen_call_expr {
 
 sub codegen_name_expr {
     my $name = shift->{name};
-    my $fqname = join('::', @{$name->{module}}, $name->{member});
-    my $fqname_id = $object_builder->string($fqname);
-    $bytecode_builder->push_global($fqname_id);
+    if ($name->{type} eq 'module_member') {
+        my $fqname = join('::', @{$name->{module}}, $name->{member});
+        my $fqname_id = $object_builder->string($fqname);
+        $bytecode_builder->push_global($fqname_id);
+    } elsif ($name->{type} eq 'parameter') {
+        $bytecode_builder->push_parameter($name->{index});
+    } else {
+        ...
+    }
 }
 
 sub codegen_string_expr {

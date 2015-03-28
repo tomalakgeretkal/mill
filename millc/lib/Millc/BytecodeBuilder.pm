@@ -40,4 +40,10 @@ sub push_unit {
     print $fh "\x06";
 }
 
+sub push_parameter {
+    my $fh = shift->{fh};
+    print $fh "\x08";
+    print $fh pack('L<', shift);
+}
+
 1;
