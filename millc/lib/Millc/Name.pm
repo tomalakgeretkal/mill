@@ -7,6 +7,11 @@ our @EXPORT_OK = 'resolve';
 sub resolve {
     my ($ast, $symbols) = @_;
     $symbols //= {
+        'infix~' => {
+            type => 'module_member_symbol',
+            module => ['std', 'always'],
+            member => 'infix~',
+        },
         'String' => {
             type => 'module_member_symbol',
             module => ['std', 'always'],
@@ -56,11 +61,19 @@ sub resolve {
         },
 
         call_expr => sub {
-            ({
+            return {
                 %$ast,
                 callee => resolve($ast->{callee}, { %$symbols }),
                 arguments => [map { resolve($_, { %$symbols }) } @{$ast->{arguments}}],
-            });
+            };
+        },
+
+        infix_expr => sub {
+            return {
+                %$ast,
+                callee => resolve($ast->{callee}, { %$symbols }),
+                arguments => [map { resolve($_, { %$symbols }) } @{$ast->{arguments}}],
+            };
         },
 
         name_expr => sub {

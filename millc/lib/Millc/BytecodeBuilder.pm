@@ -46,4 +46,9 @@ sub push_parameter {
     print $fh pack('L<', shift);
 }
 
+sub swap {
+    my $fh = shift->{fh};
+    print $fh "\x09";
+}
+
 1;

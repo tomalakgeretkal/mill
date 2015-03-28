@@ -1,5 +1,6 @@
 package Millc::Parse;
 use Exporter 'import';
+use List::Util 'reduce';
 use Modern::Perl;
 
 our @EXPORT_OK = qw(parse);
@@ -97,7 +98,23 @@ sub main_decl {
 }
 
 sub expr {
-    call_like_expr();
+    add_expr();
+}
+
+sub add_expr {
+    my @operands = (call_like_expr(), @{many(sub {
+        expect('tilde');
+        call_like_expr();
+    })});
+    use Data::Dumper;
+    reduce { ({
+        type => 'infix_expr',
+        callee => {
+            type => 'name_expr',
+            name => ['infix~'],
+        },
+        arguments => [$a, $b],
+    }) } @operands;
 }
 
 sub call_like_expr {

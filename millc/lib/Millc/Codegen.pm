@@ -62,12 +62,22 @@ sub codegen_main_decl {
 sub codegen_expr {
     my $expr = shift;
     my %codegens = (
+        infix_expr => \&codegen_call_expr,
         call_expr => \&codegen_call_expr,
         name_expr => \&codegen_name_expr,
         string_expr => \&codegen_string_expr,
         block_expr => \&codegen_block_expr,
     );
     $codegens{$expr->{type}}->($expr);
+}
+
+sub codegen_infix_expr {
+    my $infix_expr = shift;
+    codegen_expr($infix_expr->{arguments}->[0]);
+    codegen_expr($infix_expr->{callee});
+    $bytecode_builder->swap();
+    codegen_expr($infix_expr->{arguments}->[1]);
+    $bytecode_builder->call(2);
 }
 
 sub codegen_call_expr {
