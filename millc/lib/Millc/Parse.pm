@@ -74,9 +74,20 @@ sub proc_decl {
     expect('proc');
     my $name = expect('identifier')->{value};
     expect('left_parenthesis');
+    my @params = eval { try sub {
+        my $name = expect('identifier')->{value};
+        expect('colon');
+        my $type = expr();
+        { name => $name, type => $type };
+    } };
     expect('right_parenthesis');
     my $body = block_expr();
-    { type => 'proc_decl', name => $name, body => $body };
+    {
+        type => 'proc_decl',
+        name => $name,
+        params => \@params,
+        body => $body,
+    };
 }
 
 sub main_decl {

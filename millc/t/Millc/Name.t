@@ -24,6 +24,7 @@ eq_or_diff(resolve(parse([lex($hello_world)])), {
         {
             type => 'proc_decl',
             name => 'f',
+            params => [],
             body => {
                 type => 'block_expr',
                 stmts => [],
