@@ -15,5 +15,5 @@ proc ungreet(name: String) {
 
 MAIN {
     greet("rightfold");
-    greet("world");
+    ungreet("world");
 }
