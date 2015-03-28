@@ -6,13 +6,14 @@ use Modern::Perl;
 our @EXPORT_OK = qw(lex);
 
 my @patterns = (
+    [ qr/::/, 'colon_colon' ],
+    [ qr/:/, 'colon' ],
     [ qr/;/, 'semicolon' ],
     [ qr/\./, 'period' ],
     [ qr/\(/, 'left_parenthesis' ],
     [ qr/\)/, 'right_parenthesis' ],
     [ qr/{/, 'left_brace' ],
     [ qr/}/, 'right_brace' ],
-    [ qr/::/, 'colon_colon' ],
 
     [ qr/".*?"/, 'string', sub { substr($_[0], 1, length($_[0]) - 2) } ],
 

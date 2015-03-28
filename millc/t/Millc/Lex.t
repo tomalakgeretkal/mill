@@ -18,7 +18,7 @@ baz
 use std::io;
 #)
 
-proc f() { }
+proc f(x: String) { }
 
 MAIN {
     io::writeln("Hello, world!");
@@ -37,6 +37,9 @@ is_deeply([lex($hello_world)], [
     { type => 'proc' },
     { type => 'identifier', value => 'f' },
     { type => 'left_parenthesis' },
+    { type => 'identifier', value => 'x' },
+    { type => 'colon' },
+    { type => 'identifier', value => 'String' },
     { type => 'right_parenthesis' },
     { type => 'left_brace' },
     { type => 'right_brace' },
