@@ -16,7 +16,7 @@ TEST_CASE("interpreter works", "[Interpreter]") {
         baka::io::memory_stream source;
         source.write(data.data(), data.data() + data.size());
         source.seek_begin(0);
-        return mill::interpret(vm, object, source);
+        return mill::interpret(vm, object, source, nullptr);
     };
 
     Object object;

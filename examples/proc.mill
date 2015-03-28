@@ -5,12 +5,16 @@ A program which demonstrates how to define and call procedures.
 
 use std::io;
 
+proc show(message: String) {
+    io::writeln(message);
+}
+
 proc hi() {
-    io::writeln("Hello, world!");
+    show("Hello, world!");
 }
 
 proc bye() {
-    io::writeln("Goodbye, world!");
+    show("Goodbye, world!");
 }
 
 MAIN {

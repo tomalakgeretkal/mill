@@ -14,8 +14,8 @@ namespace mill {
         template<typename ReaderSeeker>
         class Interpreter {
         public:
-            Interpreter(VM& vm, Object const& object, ReaderSeeker& source)
-                : vm(&vm), object(&object), source(&source) { }
+            Interpreter(VM& vm, Object const& object, ReaderSeeker& source, Value** params)
+                : vm(&vm), object(&object), source(&source), params(params) { }
 
             boost::intrusive_ptr<Value> operator()() {
                 boost::intrusive_ptr<Value> result;
@@ -42,6 +42,11 @@ namespace mill {
 
             boost::intrusive_ptr<Value> visitPushUnit() {
                 stack.push(make<Unit>());
+                return nullptr;
+            }
+
+            boost::intrusive_ptr<Value> visitPushParameter(std::uint32_t index) {
+                stack.push(params[index]);
                 return nullptr;
             }
 
@@ -77,13 +82,14 @@ namespace mill {
             VM* vm;
             Object const* object;
             ReaderSeeker* source;
+            Value** params;
             std::stack<boost::intrusive_ptr<Value>> stack;
         };
     }
 
     template<typename ReaderSeeker>
-    boost::intrusive_ptr<Value> interpret(VM& vm, Object const& object, ReaderSeeker& source) {
-        detail::Interpreter<ReaderSeeker> interpreter(vm, object, source);
+    boost::intrusive_ptr<Value> interpret(VM& vm, Object const& object, ReaderSeeker& source, Value** params) {
+        detail::Interpreter<ReaderSeeker> interpreter(vm, object, source, params);
         return interpreter();
     }
 }

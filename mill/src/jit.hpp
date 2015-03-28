@@ -43,7 +43,7 @@ namespace mill {
                     llvm::PointerType::getUnqual(valueType()),
                     nullptr
                 );
-                auto function = llvm::cast<llvm::Function>(functionConstant);
+                function = llvm::cast<llvm::Function>(functionConstant);
 
                 auto entry = llvm::BasicBlock::Create(*ctx, "", function);
                 builder.SetInsertPoint(entry);
@@ -75,6 +75,11 @@ namespace mill {
                 auto unit = make<Unit>();
                 retain(*unit); // TODO: Fix memory leak.
                 stack.push(pointerLiteral(unit.get()));
+            }
+
+            void visitPushParameter(std::uint32_t index) {
+                auto argv = &*++++function->getArgumentList().begin();
+                stack.push(builder.CreateGEP(argv, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(*ctx), index)}));
             }
 
             void visitPop() {
@@ -131,6 +136,7 @@ namespace mill {
             llvm::Module* module;
             llvm::IRBuilder<> builder;
             ReaderSeeker* source;
+            llvm::Function* function;
             std::stack<llvm::Value*> stack;
 
             static auto uniqueID() {

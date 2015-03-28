@@ -10,6 +10,7 @@
 #include "object.hpp"
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <utility>
 #include "value.hpp"
 #include <vector>
@@ -38,6 +39,10 @@ int main(int argc, char const** argv) {
     }));
 
     std::vector<std::future<boost::intrusive_ptr<Value>>> results;
+    for (auto i = 0; i < 100; ++i) {
+        results.push_back(vm.call(vm.global("main::MAIN").get(), 0, nullptr));
+    }
+    sleep(1);
     for (auto i = 0; i < 100; ++i) {
         results.push_back(vm.call(vm.global("main::MAIN").get(), 0, nullptr));
     }

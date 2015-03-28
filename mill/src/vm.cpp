@@ -39,7 +39,7 @@ void mill::VM::loadObject(Object const& object) {
                 baka::io::memory_stream bodyReader;
                 bodyReader.write((char*)body.data(), (char*)body.data() + body.size());
                 bodyReader.seek_begin(0);
-                return interpret(vm, object, bodyReader);
+                return interpret(vm, object, bodyReader, argv);
             }
         });
     }
