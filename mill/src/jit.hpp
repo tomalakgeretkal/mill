@@ -20,7 +20,6 @@
 #include <llvm/Support/TargetSelect.h>
 #include <mutex>
 #include "object.hpp"
-#include <stack>
 #include <string>
 #include <vector>
 #include "value.hpp"
@@ -59,12 +58,12 @@ namespace mill {
 
             void visitPushGlobal(std::uint32_t nameIndex) {
                 auto ptr = vm->global(*object, nameIndex).get();
-                stack.push(pointerLiteral(ptr));
+                stack.push_back(pointerLiteral(ptr));
             }
 
             void visitPushString(std::uint32_t index) {
                 auto ptr = vm->string(*object, index).get();
-                stack.push(pointerLiteral(ptr));
+                stack.push_back(pointerLiteral(ptr));
             }
 
             void visitPushBoolean(std::uint8_t) {
@@ -74,28 +73,33 @@ namespace mill {
             void visitPushUnit() {
                 auto unit = make<Unit>();
                 retain(*unit); // TODO: Fix memory leak.
-                stack.push(pointerLiteral(unit.get()));
+                stack.push_back(pointerLiteral(unit.get()));
             }
 
             void visitPushParameter(std::uint32_t index) {
                 auto argv = &*++++function->getArgumentList().begin();
-                stack.push(builder.CreateGEP(argv, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(*ctx), index)}));
+                stack.push_back(builder.CreateGEP(argv, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(*ctx), index)}));
             }
 
             void visitPop() {
-                stack.pop();
+                stack.pop_back();
+            }
+
+            void visitSwap() {
+                using std::swap;
+                swap(stack[stack.size() - 1], stack[stack.size() - 2]);
             }
 
             void visitCall(std::uint32_t argc) {
                 std::vector<llvm::Value*> argv(argc);
                 for (decltype(argc) i = 0; i < argc; ++i) {
-                    argv[i] = stack.top();
-                    stack.pop();
+                    argv[i] = stack.back();
+                    stack.pop_back();
                 }
                 std::reverse(argv.begin(), argv.end());
 
-                auto callee = stack.top();
-                stack.pop();
+                auto callee = stack.back();
+                stack.pop_back();
 
                 auto llvmThunkI8Ptr = pointerLiteral(reinterpret_cast<void*>(callThunk));
                 auto llvmThunkPtr = builder.CreatePointerCast(
@@ -121,12 +125,12 @@ namespace mill {
                 for (auto&& arg : argv) {
                     llvmArgv.push_back(arg);
                 }
-                stack.push(builder.CreateCall(llvmThunkPtr, llvmArgv));
+                stack.push_back(builder.CreateCall(llvmThunkPtr, llvmArgv));
             }
 
             void visitReturn() {
-                builder.CreateRet(stack.top());
-                stack.pop();
+                builder.CreateRet(stack.back());
+                stack.pop_back();
             }
 
         private:
@@ -137,7 +141,7 @@ namespace mill {
             llvm::IRBuilder<> builder;
             ReaderSeeker* source;
             llvm::Function* function;
-            std::stack<llvm::Value*> stack;
+            std::vector<llvm::Value*> stack;
 
             static auto uniqueID() {
                 static std::uintmax_t id = 0;

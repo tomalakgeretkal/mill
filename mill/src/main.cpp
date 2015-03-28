@@ -37,6 +37,11 @@ int main(int argc, char const** argv) {
         std::cout << dynamic_cast<String&>(*argv[0]).value << '\n';
         return make<Unit>();
     }));
+    vm.setGlobal("std::always::infix~", make<Subroutine>([&] (VM&, std::size_t, Value** argv) {
+        auto& a = dynamic_cast<String&>(*argv[0]);
+        auto& b = dynamic_cast<String&>(*argv[1]);
+        return make<String>(a.value + b.value);
+    }));
 
     std::vector<std::future<boost::intrusive_ptr<Value>>> results;
     for (auto i = 0; i < 100; ++i) {
