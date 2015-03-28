@@ -32,10 +32,10 @@ int main(int argc, char const** argv) {
     vm.loadObject(object);
 
     std::mutex coutMutex;
-    vm.setGlobal("std::io::writeln", make<Subroutine>([&] (VM&, std::size_t, Value** argv) {
+    vm.setGlobal("std::io::writeln", make<Subroutine>([&] (VM&, std::size_t, Value** argv) -> boost::intrusive_ptr<Value> {
         std::lock_guard<decltype(coutMutex)> lock(coutMutex);
         std::cout << dynamic_cast<String&>(*argv[0]).value << '\n';
-        return make<Unit>();
+        return &Unit::instance();
     }));
     vm.setGlobal("std::always::infix~", make<Subroutine>([&] (VM&, std::size_t, Value** argv) {
         auto& a = dynamic_cast<String&>(*argv[0]);

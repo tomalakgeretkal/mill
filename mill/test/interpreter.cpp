@@ -56,7 +56,7 @@ TEST_CASE("interpreter works", "[Interpreter]") {
         vm.setGlobal("foo", make<Subroutine>([&] (VM&, std::size_t argc_, Value** argv_) {
             argc = argc_;
             std::copy(argv_, argv_ + argc_, std::back_inserter(argv));
-            return make<Unit>();
+            return &Unit::instance();
         }));
         vm.loadObject(object);
         REQUIRE(dynamic_cast<Unit*>(interpret(vm, object, {

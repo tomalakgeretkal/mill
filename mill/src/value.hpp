@@ -13,6 +13,8 @@ namespace mill {
 
     class Value {
     public:
+        Value() : referenceCount(1) { }
+
         virtual ~Value() = 0;
 
     private:
@@ -22,7 +24,16 @@ namespace mill {
         friend void release(Value const&);
     };
 
-    class Unit : public Value { };
+    class Unit : public Value {
+    public:
+        static Unit& instance() {
+            static Unit unit;
+            return unit;
+        }
+
+    private:
+        Unit() = default;
+    };
 
     template<typename T>
     class CXXValue : public Value {

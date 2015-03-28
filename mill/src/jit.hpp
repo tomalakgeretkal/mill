@@ -73,9 +73,7 @@ namespace mill {
             }
 
             void visitPushUnit() {
-                auto unit = make<Unit>();
-                retain(*unit); // TODO: Fix memory leak.
-                stack.push_back(pointerLiteral(unit.get()));
+                stack.push_back(pointerLiteral(&Unit::instance()));
                 emitRetain(stack.back());
             }
 

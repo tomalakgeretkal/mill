@@ -40,7 +40,7 @@ namespace mill {
             }
 
             boost::intrusive_ptr<Value> visitPushUnit() {
-                stack.push_back(make<Unit>());
+                stack.push_back(&Unit::instance());
                 return nullptr;
             }
 
