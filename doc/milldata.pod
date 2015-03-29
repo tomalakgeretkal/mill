@@ -28,6 +28,12 @@ for some type, making that type a subtype of the protocol type.
 
 A structure type defines a set of fields.
 
+    struct User {
+        id: Int
+        name: String
+        birthday: LocalDate
+    }
+
 A lens will be generated for each field.
 
 =head3 Union Types
