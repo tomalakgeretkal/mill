@@ -28,6 +28,31 @@ for some type, making that type a subtype of the protocol type.
 
 A structure type defines a set of fields.
 
+A lens will be generated for each field.
+
+=head3 Union Types
+
+A union type represents one of many possible structures.
+
+    union Option {
+        Some(x: Any)
+        None
+    }
+
+Optionally, a union type can describe fields common to all variants:
+
+    union Token {
+        common(position: Int)
+        Identifier(name: String)
+        StringLiteral(value: String)
+        EOF
+    }
+
+The common fields will be inserted at the beginning of the field list for every
+variant.
+
+A lens will be generated for each common field.
+
 =head2 Destruction
 
 When the reference count of a Mill value reaches zero, the C<destruct>
