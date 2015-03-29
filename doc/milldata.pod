@@ -24,6 +24,23 @@ A protocol type defines a set of subroutines which can be overloaded by a
 protocol implementation. A protocol implementation overloads these subroutines
 for some type, making that type a subtype of the protocol type.
 
+    protocol Monitor {
+        proc start(monitor: this) ensure !stopped(monitor)
+        proc stop(monitor: this) ensure stopped(monitor)
+        func running(monitor: this): Boolean
+    }
+
+    struct PingMonitor {
+        address: Address
+        interval: Duration
+    }
+
+    implement Monitor for PingMonitor {
+        proc start(monitor: PingMonitor) { ... }
+        proc stop(monitor: PingMonitor) { ... }
+        proc running(monitor: PingMonitor) { ... }
+    }
+
 =head3 Structure Types
 
 A structure type defines a set of fields.
