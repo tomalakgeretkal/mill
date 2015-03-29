@@ -11,3 +11,5 @@
 
 0x03 Call uint32
 0x05 Return
+0x0A ConditionalJump uint32
+0x0B UnconditionalJump uint32

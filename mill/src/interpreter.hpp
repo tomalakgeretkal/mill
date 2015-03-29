@@ -83,6 +83,20 @@ namespace mill {
                 return stack.back();
             }
 
+            boost::intrusive_ptr<Value> visitUnconditionalJump(std::uint32_t offset) {
+                source->seek_begin(offset);
+                return nullptr;
+            }
+
+            boost::intrusive_ptr<Value> visitConditionalJump(std::uint32_t offset) {
+                auto condition = dynamic_cast<Boolean&>(*stack.back()).value;
+                stack.pop_back();
+                if (condition) {
+                    source->seek_begin(offset);
+                }
+                return nullptr;
+            }
+
         private:
             VM* vm;
             Object const* object;
