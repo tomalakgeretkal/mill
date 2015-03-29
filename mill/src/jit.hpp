@@ -116,8 +116,7 @@ namespace mill {
             }
 
             void visitPop() {
-                emitRelease(top());
-                pop();
+                emitRelease(pop());
             }
 
             void visitSwap() {
@@ -135,7 +134,6 @@ namespace mill {
                 std::reverse(argv.begin(), argv.end());
 
                 auto callee = pop();
-                emitRetain(callee);
 
                 auto llvmThunkI8Ptr = pointerLiteral(reinterpret_cast<void*>(callThunk));
                 auto llvmThunkPtr = builder.CreatePointerCast(
@@ -163,8 +161,8 @@ namespace mill {
                 }
                 push(builder.CreateCall(llvmThunkPtr, llvmArgv));
 
-                for (auto&& arg : argv) {
-                    emitRelease(arg);
+                for (auto it = argv.rbegin(); it != argv.rend(); ++it) {
+                    emitRelease(*it);
                 }
                 emitRelease(callee);
             }

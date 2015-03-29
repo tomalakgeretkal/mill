@@ -13,7 +13,7 @@ namespace mill {
 
     class Value {
     public:
-        Value() : referenceCount(1) { }
+        Value() : referenceCount(0) { }
 
         virtual ~Value() = 0;
 
@@ -28,6 +28,8 @@ namespace mill {
     public:
         static Unit& instance() {
             static Unit unit;
+            static auto x = (retain(unit), 0);
+            (void)x;
             return unit;
         }
 
