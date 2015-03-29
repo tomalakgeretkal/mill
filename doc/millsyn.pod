@@ -89,19 +89,19 @@ The arguments of a short lambda:
 
 =over
 
-=item C<%&>
+=item C<$&>
 
-The string matched by the last regex match.
+The string matched by the last regex match in the current thread.
 
-=item C<%->
+=item C<$->
 
 A sequence of the strings matched by the non-named groups of the last regex
-match.
+match in the current thread.
 
-=item C<%+>
+=item C<$+>
 
 A dictionary of the strings matched by the named groups of the last regex
-match.
+match in the current thread.
 
 =back
 
@@ -109,10 +109,10 @@ match.
 
 =over
 
-=item C<%?>
+=item C<$?>
 
-The exit status of the last command executed with C<[sh(…)| … |]>. Defaults to
-zero.
+The exit status of the last command executed with C<[sh(…)| … |]> in the
+current thread. Defaults to zero.
 
 =back
 
