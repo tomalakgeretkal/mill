@@ -42,7 +42,8 @@ current thread, unlike mutations to C<$> variables.
 
 =head3 Special Variables
 
-There are certain built-in special variables:
+There are certain built-in special variables. They cannot be assigned to unless
+specified otherwise.
 
 =head4 General Special Variables
 
@@ -72,6 +73,8 @@ default argument for subroutines.
         case _ =>
             assert(count(%_) != 2)
     }
+
+C<%_> can be assigned to and in that case behaves like a normal C<%> variable.
 
 =item C<$0, $1, $2, …>
 
