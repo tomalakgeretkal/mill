@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mill</title>
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic">
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="mill.css">
+</head>
+<body>
+    <div class="mill-container">
+        <header class="mill-header">
+            <h1>Mill</h1>
+        </header>
+        <section class="mill-content">
+
+
+
+<h1 id="NAME">NAME</h1>
+
+<p>milldata - Mill types and values</p>
+
+<h1 id="DESCRIPTION">DESCRIPTION</h1>
+
+<p>Mill has a dynamic type system.</p>
+
+<h2 id="Types">Types</h2>
+
+<h3 id="The-Top-and-Bottom-Types">The Top and Bottom Types</h3>
+
+<p>The top type is a supertype of all types. The bottom type is a subtype of all types. There are no types that are strict supertypes of the top type and there are no types that are strict subtypes of the bottom type. There are no values of the bottom type.</p>
+
+<p>The bottom type is typically used as the return type for subroutines that never return, and as the exception specification for subroutines that never throw.</p>
+
+<h3 id="Protocol-Types">Protocol Types</h3>
+
+<p>A protocol type defines a set of subroutines which can be overloaded by a protocol implementation. A protocol implementation overloads these subroutines for some type, making that type a subtype of the protocol type.</p>
+
+<h3 id="Structure-Types">Structure Types</h3>
+
+<p>A structure type defines a set of fields.</p>
+
+<h2 id="Destruction">Destruction</h2>
+
+<p>When the reference count of a Mill value reaches zero, the <code>destruct</code> procedure in the <code>mill</code> module is invoked if it is overloaded for the type of the value. The value is passed as the argument to <code>destruct</code>.</p>
+
+
+        </section>
+        <footer class="mill-footer">
+            <p class="mill-copyright">&copy; 2015 rightfold.</p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -9,13 +9,44 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-h1 {
-    font-size: 24px;
-    line-height: 36px;
+h1, h2, h3, h4 {
+    font-weight: bold;
 }
 
-p, pre {
+h1 {
+    font-size: 24px;
+    line-height: 54px;
+}
+
+h2 {
+    font-size: 20px;
+    line-height: 54px;
+}
+
+h3 {
+    font-size: 16px;
+    line-height: 54px;
+}
+
+h4 {
+    font-size: 14px;
+    line-height: 54px;
+}
+
+dt, dd, p, pre {
     line-height: 18px;
+}
+
+dt {
+    font-weight: bold;
+}
+
+dd + dt {
+    margin-top: 18px;
+}
+
+dd {
+    margin-left: 18px;
 }
 
 p + p {
@@ -42,6 +73,12 @@ code {
     padding: 18px;
 }
 
+.mill-header h1 {
+    font-size: 24px;
+    font-weight: normal;
+    line-height: 36px;
+}
+
 .mill-footer {
     border-bottom: solid 4px #fcf8fe;
     border-top: solid 4px #fcf8fe;
@@ -50,6 +87,10 @@ code {
 
 .mill-content {
     padding: 18px;
+}
+
+.mill-header + .mill-content {
+    border-top: solid 4px #fcf8fe;
 }
 
 .mill-home-banner {

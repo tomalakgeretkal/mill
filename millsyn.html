@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mill</title>
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic">
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="mill.css">
+</head>
+<body>
+    <div class="mill-container">
+        <header class="mill-header">
+            <h1>Mill</h1>
+        </header>
+        <section class="mill-content">
+
+
+
+<h1 id="NAME">NAME</h1>
+
+<p>millsyn - Mill syntax</p>
+
+<h1 id="DESCRIPTION">DESCRIPTION</h1>
+
+<p>Mill has a syntax.</p>
+
+<h2 id="Variables">Variables</h2>
+
+<p>A variable is defined using the <code>let</code> keyword, for example:</p>
+
+<pre><code>    let food = &quot;orange&quot;
+    let (source, age) = (&quot;orange tree&quot;, months(1))</code></pre>
+
+<p>Variables defined with <code>let</code> are immutable unless their names start with <code>$</code> or <code>%</code>:</p>
+
+<pre><code>    let food = &quot;orange&quot;
+    let $age = months(1)
+    let %rotten = false
+    food = &quot;apple&quot; # error: attempt to assign immutable variable
+    $age = $age + years(1) # ok
+    %rotten = true # ok</code></pre>
+
+<p>The difference between <code>$</code> and <code>%</code> is that when the name of a variable starts with <code>%</code>, its value is reset at the end of the scope:</p>
+
+<pre><code>    let ($a, %b) = (1, 2)
+    {
+        $a = 3
+        %b = 4
+    }
+    p($a) # prints 3
+    p(%b) # prints 2</code></pre>
+
+<p>The value is reset even when an exception is thrown before the end of the scope is reached. Additionally, mutations to <code>%</code> variables are visible only to the current thread, unlike mutations to <code>$</code> variables.</p>
+
+<h3 id="Special-Variables">Special Variables</h3>
+
+<p>There are certain built-in special variables. They cannot be assigned to unless specified otherwise.</p>
+
+<h4 id="General-Special-Variables">General Special Variables</h4>
+
+<dl>
+
+<dt id="pod-_"><code>%_</code></dt>
+<dd>
+
+<p>The topic, which is set by various control structures. It is often used as a default argument for subroutines.</p>
+
+<pre><code>    # proc outln(s: String = %_)
+    # proc errln(s: String = %_)
+
+    for list(1, 2, 3, 4, 5) {
+        p(%_)
+    }
+
+    given &quot;Hello, world!&quot; {
+        outln()
+        errln()
+    }
+
+    match list(1, 2) {
+        case list(_, _) =&gt;
+            assert(count(%_) == 2)
+
+        case _ =&gt;
+            assert(count(%_) != 2)
+    }</code></pre>
+
+<p><code>%_</code> can be assigned to and in that case behaves like a normal <code>%</code> variable.</p>
+
+</dd>
+<dt id="pod-0-1-2"><code>$0, $1, $2, &hellip;</code></dt>
+<dd>
+
+<p>The arguments of a short lambda:</p>
+
+<pre><code>    let addmul = $($0 + $1 * $2)
+    p(addmul(3, 6, 8)) # 51</code></pre>
+
+</dd>
+</dl>
+
+<h4 id="Special-Variables-Related-to-Regexen">Special Variables Related to Regexen</h4>
+
+<dl>
+
+<dt id="pod"><code>$&amp;</code></dt>
+<dd>
+
+<p>The string matched by the last regex match in the current thread.</p>
+
+</dd>
+<dt id="pod1"><code>$-</code></dt>
+<dd>
+
+<p>A sequence of the strings matched by the non-named groups of the last regex match in the current thread.</p>
+
+</dd>
+<dt id="pod2"><code>$+</code></dt>
+<dd>
+
+<p>A dictionary of the strings matched by the named groups of the last regex match in the current thread.</p>
+
+</dd>
+</dl>
+
+<h4 id="Special-Variables-Related-to-the-Environment">Special Variables Related to the Environment</h4>
+
+<dl>
+
+<dt id="pod3"><code>$?</code></dt>
+<dd>
+
+<p>The exit status of the last command executed with <code>[sh(&hellip;)| &hellip; |]</code> in the current thread. Defaults to zero.</p>
+
+</dd>
+</dl>
+
+
+        </section>
+        <footer class="mill-footer">
+            <p class="mill-copyright">&copy; 2015 rightfold.</p>
+        </footer>
+    </div>
+</body>
+</html>
