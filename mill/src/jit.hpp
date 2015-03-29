@@ -72,10 +72,8 @@ namespace mill {
                 } catch (baka::io::eof_error const&) { }
 
                 llvm::legacy::FunctionPassManager fpm(module);
-                fpm.add(llvm::createBasicAliasAnalysisPass());
                 fpm.add(llvm::createPromoteMemoryToRegisterPass());
                 fpm.add(llvm::createInstructionCombiningPass());
-                fpm.add(llvm::createReassociatePass());
                 fpm.add(llvm::createGVNPass());
                 fpm.add(llvm::createCFGSimplificationPass());
                 fpm.doInitialization();
@@ -289,9 +287,17 @@ namespace mill {
     auto jitCompile(VM& vm, Object const& object, ReaderSeeker& source) {
         static llvm::LLVMContext ctx;
         static auto module = new llvm::Module("main", ctx);
-        static auto engine = (llvm::InitializeNativeTarget(), llvm::EngineBuilder(module).create());
+        static llvm::ExecutionEngine* engine = nullptr;
         static std::mutex mutex;
         std::lock_guard<decltype(mutex)> lock(mutex);
+
+        if (!engine) {
+            llvm::InitializeNativeTarget();
+            auto builder = llvm::EngineBuilder(module);
+            auto target = builder.selectTarget();
+            target->Options.PrintMachineCode = 0;
+            engine = builder.create(target);
+        }
 
         detail::JITCompiler<ReaderSeeker> jitCompiler(vm, object, ctx, *module, source);
         auto llvmPointer = jitCompiler();
