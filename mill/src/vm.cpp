@@ -46,6 +46,9 @@ void mill::VM::loadObject(Object const& object) {
 }
 
 void mill::VM::setGlobal(std::string const& name, boost::intrusive_ptr<Value> value) {
+    if (!name.empty() && name[0] != '$' && name[0] != '%' && globals.count(name)) {
+        throw std::runtime_error("cannot mutate immutable global '" + name + "'");
+    }
     globals.emplace(name, std::move(value));
 }
 
