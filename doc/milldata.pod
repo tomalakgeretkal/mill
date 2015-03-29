@@ -51,7 +51,8 @@ Optionally, a union type can describe fields common to all variants:
 The common fields will be inserted at the beginning of the field list for every
 variant.
 
-A lens will be generated for each common field.
+A lens will be generated for each common field. A prism will be generated for
+each non-common field.
 
 =head2 Destruction
 
