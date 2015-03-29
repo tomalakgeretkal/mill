@@ -18,6 +18,9 @@ of the bottom type.
 The bottom type is typically used as the return type for subroutines that never
 return, and as the exception specification for subroutines that never throw.
 
+The top type is C<std::always::Any> and the bottom type is
+C<std::always::Bottom>.
+
 =head3 Protocol Types
 
 A protocol type defines a set of subroutines which can be overloaded by a
