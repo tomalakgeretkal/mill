@@ -54,8 +54,8 @@ specified otherwise.
 The topic, which is set by various control structures. It is often used as a
 default argument for subroutines.
 
-    # proc outln(s: String = %_)
-    # proc errln(s: String = %_)
+    # proc outln(s: String = %_) { … }
+    # proc errln(s: String = %_) { … }
 
     for list(1, 2, 3, 4, 5) {
         p(%_)
@@ -78,7 +78,7 @@ C<%_> can be assigned to and in that case behaves like a normal C<%> variable.
 
 =item C<$0, $1, $2, …>
 
-The arguments of a short lambda:
+The parameters of a short lambda:
 
     let addmul = $($0 + $1 * $2)
     p(addmul(3, 6, 8)) # 51
