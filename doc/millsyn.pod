@@ -34,4 +34,7 @@ with C<%>, its value is reset at the end of the scope:
     p($a) # prints 3
     p(%b) # prints 2
 
+The value is reset even when an exception is thrown before the end of the scope
+is reached.
+
 =cut
