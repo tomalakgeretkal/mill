@@ -13,6 +13,25 @@
 
 namespace {
     auto constexpr jitThreshold = 10;
+    __thread mill::Fiber* volatile currentFiber = nullptr;
+}
+
+void mill::Fiber::resume() noexcept {
+    while (running)
+        ;
+    running = true;
+    currentFiber = this;
+    pull();
+    currentFiber = nullptr;
+    running = false;
+}
+
+mill::Fiber& mill::Fiber::current() {
+    return *currentFiber;
+}
+
+void mill::Fiber::yield() {
+    currentFiber->push->operator()();
 }
 
 void mill::VM::loadObject(Object const& object) {
@@ -66,6 +85,10 @@ std::future<boost::intrusive_ptr<mill::Value>> mill::VM::call(Value* value, std:
         return dynamic_cast<Subroutine&>(*value)(*this, argc, argv);
     });
     auto result = task.get_future();
-    threadPool.post(std::move(task));
+    spawn(std::move(task));
     return result;
+}
+
+void mill::VM::schedule(Fiber& fiber) {
+    threadPool.post([&] { fiber.resume(); });
 }

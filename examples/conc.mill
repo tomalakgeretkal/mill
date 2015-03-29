@@ -1,0 +1,8 @@
+use std::conc;
+use std::io;
+
+MAIN {
+    io::writeln("A");
+    conc::yield();
+    io::writeln("B");
+}

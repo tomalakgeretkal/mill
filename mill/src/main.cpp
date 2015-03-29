@@ -42,6 +42,12 @@ int main(int argc, char const** argv) {
         auto& b = dynamic_cast<String&>(*argv[1]);
         return make<String>(a.value + b.value);
     }));
+    vm.setGlobal("std::conc::yield", make<Subroutine>([] (VM& vm, std::size_t, Value**) {
+        auto& fiber = Fiber::current();
+        vm.schedule(fiber);
+        Fiber::yield();
+        return &Unit::instance();
+    }));
 
     std::vector<std::future<boost::intrusive_ptr<Value>>> results;
     for (auto i = 0; i < 100; ++i) {
