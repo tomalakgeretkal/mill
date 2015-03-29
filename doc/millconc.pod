@@ -4,4 +4,8 @@ millconc - Concurrency in Mill
 
 =head1 DESCRIPTION
 
+Mill has concurrency features that are similar to those found in Go. Spawning
+threads of execution is cheap and communication happens through synchronized
+channels.
+
 =cut
