@@ -8,6 +8,13 @@ millsyn - Mill syntax
 
 Mill has a syntax.
 
+=head2 Keywords
+
+    ensure expose for func if invariant let proc require struct union use while
+    case covariant given implement match protocol recursive switch this
+    contravariant goto infix invariant is isnt postfix prefix return seq yield
+    CHECK DEINIT INIT MAIN catch default defer do else fail last next redo try
+
 =head2 Variables
 
 A variable is defined using the C<let> keyword, for example:
