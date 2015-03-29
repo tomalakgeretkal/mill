@@ -5,8 +5,8 @@
 #include <memory>
 #include <utility>
 
-namespace mill <%
-    class ThreadPool <%
+namespace mill {
+    class ThreadPool {
     public:
         ThreadPool();
 
@@ -15,16 +15,16 @@ namespace mill <%
         ~ThreadPool();
 
         template<typename F>
-        void post(F function) <%
+        void post(F function) {
             // FIXME: ioService.post creates a fucking copy of the
             // function we pass in.
             auto fuck = std::make_shared<F>(std::move(function));
-            ioService.post([=] <% return (*fuck)(); %>);
-        %>
+            ioService.post([=] { return (*fuck)(); });
+        }
 
     private:
         boost::thread_group threads;
         boost::asio::io_service ioService;
         boost::asio::io_service::work work;
-    %>;
-%>
+    };
+}

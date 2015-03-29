@@ -30,15 +30,15 @@
 #include "value.hpp"
 #include "vm.hpp"
 
-namespace mill <%
-    namespace detail <%
+namespace mill {
+    namespace detail {
         template<typename ReaderSeeker>
-        class JITCompiler <%
+        class JITCompiler {
         public:
             JITCompiler(VM& vm, Object const& object, llvm::LLVMContext& ctx, llvm::Module& module, ReaderSeeker& source)
-                : vm(&vm), object(&object), ctx(&ctx), module(&module), builder(ctx), source(&source) <% %>
+                : vm(&vm), object(&object), ctx(&ctx), module(&module), builder(ctx), source(&source) { }
 
-            llvm::Function* operator()() <%
+            llvm::Function* operator()() {
                 auto functionConstant = module->getOrInsertFunction(
                     std::to_string(uniqueID()),
                     valueType(),
@@ -65,11 +65,11 @@ namespace mill <%
                     stackSize
                 );
 
-                try <%
-                    for (;;) <%
+                try {
+                    for (;;) {
                         readInstruction(*source, *this);
-                    %>
-                %> catch (baka::io::eof_error const&) <% %>
+                    }
+                } catch (baka::io::eof_error const&) { }
 
                 llvm::legacy::FunctionPassManager fpm(module);
                 fpm.add(llvm::createPromoteMemoryToRegisterPass());
@@ -78,59 +78,59 @@ namespace mill <%
                 fpm.add(llvm::createCFGSimplificationPass());
                 fpm.doInitialization();
 
-                for (auto it = module->begin(); it != module->end(); ++it) <%
+                for (auto it = module->begin(); it != module->end(); ++it) {
                     fpm.run(*it);
-                %>
+                }
 
                 return function;
-            %>
+            }
 
-            void visitPushGlobal(std::uint32_t nameIndex) <%
+            void visitPushGlobal(std::uint32_t nameIndex) {
                 auto ptr = vm->global(*object, nameIndex).get();
                 push(pointerLiteral(ptr));
                 emitRetain(top());
-            %>
+            }
 
-            void visitPushString(std::uint32_t index) <%
+            void visitPushString(std::uint32_t index) {
                 auto ptr = vm->string(*object, index).get();
                 push(pointerLiteral(ptr));
                 emitRetain(top());
-            %>
+            }
 
-            void visitPushBoolean(std::uint8_t) <%
+            void visitPushBoolean(std::uint8_t) {
                 assert(0);
-            %>
+            }
 
-            void visitPushUnit() <%
+            void visitPushUnit() {
                 push(pointerLiteral(&Unit::instance()));
                 emitRetain(top());
-            %>
+            }
 
-            void visitPushParameter(std::uint32_t index) <%
+            void visitPushParameter(std::uint32_t index) {
                 auto argv = &*++++function->getArgumentList().begin();
-                auto argPtr = builder.CreateGEP(argv, <%
+                auto argPtr = builder.CreateGEP(argv, {
                     llvm::ConstantInt::get(llvm::Type::getInt64Ty(*ctx), index)
-                %>);
+                });
                 push(builder.CreateLoad(argPtr));
                 emitRetain(top());
-            %>
+            }
 
-            void visitPop() <%
+            void visitPop() {
                 emitRelease(pop());
-            %>
+            }
 
-            void visitSwap() <%
+            void visitSwap() {
                 auto a = pop();
                 auto b = pop();
                 push(a);
                 push(b);
-            %>
+            }
 
-            void visitCall(std::uint32_t argc) <%
+            void visitCall(std::uint32_t argc) {
                 std::vector<llvm::Value*> argv(argc);
-                for (decltype(argc) i = 0; i < argc; ++i) <%
+                for (decltype(argc) i = 0; i < argc; ++i) {
                     argv[i] = pop();
-                %>
+                }
                 std::reverse(argv.begin(), argv.end());
 
                 auto callee = pop();
@@ -141,43 +141,43 @@ namespace mill <%
                     llvm::PointerType::getUnqual(
                         llvm::FunctionType::get(
                             valueType(),
-                            <%
+                            {
                                 valueType(),
                                 llvm::Type::getInt8PtrTy(*ctx),
                                 llvm::Type::getInt64Ty(*ctx),
-                            %>,
+                            },
                             true
                         )
                     )
                 );
 
-                std::vector<llvm::Value*> llvmArgv<%
+                std::vector<llvm::Value*> llvmArgv{
                     callee,
                     pointerLiteral(vm),
                     llvm::ConstantInt::get(llvm::Type::getInt64Ty(*ctx), argc),
-                %>;
-                for (auto&& arg : argv) <%
+                };
+                for (auto&& arg : argv) {
                     llvmArgv.push_back(arg);
-                %>
+                }
                 push(builder.CreateCall(llvmThunkPtr, llvmArgv));
 
-                for (auto it = argv.rbegin(); it != argv.rend(); ++it) <%
+                for (auto it = argv.rbegin(); it != argv.rend(); ++it) {
                     emitRelease(*it);
-                %>
+                }
                 emitRelease(callee);
-            %>
+            }
 
-            void visitReturn() <%
+            void visitReturn() {
                 builder.CreateRet(top());
-            %>
+            }
 
-            void visitUnconditionalJump(std::uint32_t) <%
+            void visitUnconditionalJump(std::uint32_t) {
                 assert(0);
-            %>
+            }
 
-            void visitConditionalJump(std::uint32_t) <%
+            void visitConditionalJump(std::uint32_t) {
                 assert(0);
-            %>
+            }
 
         private:
             VM* vm;
@@ -190,31 +190,31 @@ namespace mill <%
             llvm::Value* stack;
             llvm::Value* stackSize;
 
-            static auto uniqueID() <%
+            static auto uniqueID() {
                 static std::uintmax_t id = 0;
                 static std::mutex mutex;
                 std::lock_guard<decltype(mutex)> lock(mutex);
                 return ++id;
-            %>
+            }
 
-            static void* callThunk(void* vcallee, void* vvm, std::uint64_t vargc, ...) <%
+            static void* callThunk(void* vcallee, void* vvm, std::uint64_t vargc, ...) {
                 auto& callee = dynamic_cast<Subroutine&>(*static_cast<Value*>(vcallee));
                 auto& vm = *static_cast<VM*>(vvm);
 
                 auto argc = static_cast<std::size_t>(vargc);
                 std::vector<Value*> argv(argc);
                 va_list args; va_start(args, vargc);
-                for (decltype(argc) i = 0; i < argc; ++i) <%
+                for (decltype(argc) i = 0; i < argc; ++i) {
                     argv[i] = static_cast<Value*>(va_arg(args, void*));
-                %>
+                }
                 va_end(args);
 
                 auto result = callee(vm, argc, argv.data());
                 retain(*result.get());
                 return result.get();
-            %>
+            }
 
-            void push(llvm::Value* value) <%
+            void push(llvm::Value* value) {
                 auto stackSizeInt = builder.CreateLoad(stackSize);
                 auto newStackSize = builder.CreateAdd(
                     stackSizeInt,
@@ -222,11 +222,11 @@ namespace mill <%
                 );
                 builder.CreateStore(newStackSize, stackSize);
 
-                auto entry = builder.CreateGEP(stack, <%stackSizeInt%>);
+                auto entry = builder.CreateGEP(stack, {stackSizeInt});
                 builder.CreateStore(value, entry);
-            %>
+            }
 
-            llvm::Value* pop() <%
+            llvm::Value* pop() {
                 auto stackSizeInt = builder.CreateLoad(stackSize);
                 auto newStackSize = builder.CreateSub(
                     stackSizeInt,
@@ -234,75 +234,75 @@ namespace mill <%
                 );
                 builder.CreateStore(newStackSize, stackSize);
 
-                auto entry = builder.CreateGEP(stack, <%newStackSize%>);
+                auto entry = builder.CreateGEP(stack, {newStackSize});
                 return builder.CreateLoad(entry);
-            %>
+            }
 
-            llvm::Value* top() <%
+            llvm::Value* top() {
                 auto stackSizeInt = builder.CreateLoad(stackSize);
                 auto topIndex = builder.CreateSub(
                     stackSizeInt,
                     llvm::ConstantInt::get(llvm::Type::getInt32Ty(*ctx), 1)
                 );
-                auto entry = builder.CreateGEP(stack, <%topIndex%>);
+                auto entry = builder.CreateGEP(stack, {topIndex});
                 return builder.CreateLoad(entry);
-            %>
+            }
 
             template<typename T>
-            llvm::Value* pointerLiteral(T const* ptr) <%
+            llvm::Value* pointerLiteral(T const* ptr) {
                 return pointerLiteral(ptr, valueType());
-            %>
+            }
 
             template<typename T>
-            llvm::Value* pointerLiteral(T const* ptr, llvm::Type* type) <%
+            llvm::Value* pointerLiteral(T const* ptr, llvm::Type* type) {
                 auto llvmI64Ptr = llvm::ConstantInt::get(llvm::Type::getInt64Ty(*ctx), (std::uint64_t)ptr);
                 return llvm::ConstantExpr::getIntToPtr(llvmI64Ptr, type);
-            %>
+            }
 
-            llvm::Type* valueType() <%
+            llvm::Type* valueType() {
                 return llvm::Type::getInt8PtrTy(*ctx);
-            %>
+            }
 
-            void emitRetain(llvm::Value* value) <%
+            void emitRetain(llvm::Value* value) {
                 auto retainPtr = pointerLiteral(
-                    +[] (void* v) <% retain(*static_cast<Value*>(v)); %>,
-                    llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getVoidTy(*ctx), <%valueType()%>, false))
+                    +[] (void* v) { retain(*static_cast<Value*>(v)); },
+                    llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getVoidTy(*ctx), {valueType()}, false))
                 );
                 builder.CreateCall(retainPtr, value);
-            %>
+            }
 
-            void emitRelease(llvm::Value* value) <%
+            void emitRelease(llvm::Value* value) {
                 auto releasePtr = pointerLiteral(
-                    +[] (void* v) <% release(*static_cast<Value*>(v)); %>,
-                    llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getVoidTy(*ctx), <%valueType()%>, false))
+                    +[] (void* v) { release(*static_cast<Value*>(v)); },
+                    llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getVoidTy(*ctx), {valueType()}, false))
                 );
                 builder.CreateCall(releasePtr, value);
-            %>
-        %>;
-    %>
+            }
+        };
+    }
 
     template<typename ReaderSeeker>
-    auto jitCompile(VM& vm, Object const& object, ReaderSeeker& source) <%
+    auto jitCompile(VM& vm, Object const& object, ReaderSeeker& source) {
         static llvm::LLVMContext ctx;
         static auto module = new llvm::Module("main", ctx);
         static llvm::ExecutionEngine* engine = nullptr;
         static std::mutex mutex;
         std::lock_guard<decltype(mutex)> lock(mutex);
 
-        if (!engine) <%
+        if (!engine) {
             llvm::InitializeNativeTarget();
             auto builder = llvm::EngineBuilder(module);
             auto target = builder.selectTarget();
             target->Options.PrintMachineCode = 0;
             engine = builder.create(target);
-        %>
+        }
 
         detail::JITCompiler<ReaderSeeker> jitCompiler(vm, object, ctx, *module, source);
         auto llvmPointer = jitCompiler();
 
         auto functionPointer = reinterpret_cast<void*(*)(void*, std::uint64_t, void**)>(engine->getPointerToFunction(llvmPointer));
-        return [=] (VM& vm, std::size_t argc, Value** argv) -> boost::intrusive_ptr<Value> <%
+        return [=] (VM& vm, std::size_t argc, Value** argv) -> boost::intrusive_ptr<Value> {
             return static_cast<Value*>(functionPointer(&vm, argc, reinterpret_cast<void**>(argv)));
-        %>;
-    %>
-%>
+        };
+    }
+}

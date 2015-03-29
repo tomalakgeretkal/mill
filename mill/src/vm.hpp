@@ -9,8 +9,8 @@
 #include "value.hpp"
 #include <vector>
 
-namespace mill <%
-    class VM : boost::noncopyable <%
+namespace mill {
+    class VM : boost::noncopyable {
     public:
         void loadObject(Object const& object);
 
@@ -27,5 +27,5 @@ namespace mill <%
         std::unordered_map<std::string, boost::intrusive_ptr<Value>> globals;
 
         ThreadPool threadPool;
-    %>;
-%>
+    };
+}
