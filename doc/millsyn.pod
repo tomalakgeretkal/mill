@@ -35,6 +35,7 @@ with C<%>, its value is reset at the end of the scope:
     p(%b) # prints 2
 
 The value is reset even when an exception is thrown before the end of the scope
-is reached.
+is reached. Additionally, mutations to C<%> variables are visible only to the
+current thread, unlike mutations to C<$> variables.
 
 =cut
