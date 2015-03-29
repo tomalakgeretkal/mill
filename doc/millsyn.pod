@@ -11,8 +11,8 @@ Mill has a syntax.
 =head2 Keywords
 
     CHECK DEINIT INIT MAIN case catch contravariant covariant default defer do
-    else ensure expose fail for func given goto if implement infix invariant is
-    isnt last let match next postfix prefix proc protocol recursive redo
+    else ensure expose fail for func given goto if implement in infix invariant
+    is isnt last let match next postfix prefix proc protocol recursive redo
     require return seq struct switch this try union use while yield
 
 =head2 Variables
