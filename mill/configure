@@ -33,7 +33,6 @@ w.variable('ldflags', ('''
     -stdlib=libc++
     -L ''' + llvm_config('--libdir') + '''
     ''' + llvm_config('--libs', 'all', '--system-libs') + '''
-    -lboost_coroutine-mt
     -lboost_system-mt
     -lboost_thread-mt
 ''').replace('\n', ' '))
