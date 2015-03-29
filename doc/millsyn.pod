@@ -1,3 +1,5 @@
+=encoding utf8
+
 =head1 NAME
 
 millsyn - Mill syntax
@@ -37,5 +39,78 @@ with C<%>, its value is reset at the end of the scope:
 The value is reset even when an exception is thrown before the end of the scope
 is reached. Additionally, mutations to C<%> variables are visible only to the
 current thread, unlike mutations to C<$> variables.
+
+=head3 Special Variables
+
+There are certain built-in special variables:
+
+=head4 General Special Variables
+
+=over
+
+=item %_
+
+The topic, which is set by various control structures. It is often used as a
+default argument for subroutines.
+
+    # proc outln(s: String = %_)
+    # proc errln(s: String = %_)
+
+    for list(1, 2, 3, 4, 5) {
+        p(%_)
+    }
+
+    given "Hello, world!" {
+        outln()
+        errln()
+    }
+
+    match list(1, 2) {
+        case list(_, _) =>
+            assert(count(%_) == 2)
+
+        case _ =>
+            assert(count(%_) != 2)
+    }
+
+=item $0, $1, $2, …
+
+The arguments of a short lambda:
+
+    let addmul = $($0 + $1 * $2)
+    p(addmul(3, 6, 8)) # 51
+
+=back
+
+=head4 Special Variables Related to Regexen
+
+=over
+
+=item %&
+
+The string matched by the last regex match.
+
+=item %-
+
+A sequence of the strings matched by the non-named groups of the last regex
+match.
+
+=item %+
+
+A dictionary of the strings matched by the named groups of the last regex
+match.
+
+=back
+
+=head4 Special Variables Related to the Environment
+
+=over
+
+=item %?
+
+The exit status of the last command executed with C<[sh(…)| … |]>. Defaults to
+zero.
+
+=back
 
 =cut
