@@ -1,4 +1,7 @@
 #include "value.hpp"
+#include <iostream>
+
+mill::Value::Value() : referenceCount(0) { }
 
 mill::Value::~Value() = default;
 

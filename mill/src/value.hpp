@@ -13,7 +13,7 @@ namespace mill {
 
     class Value {
     public:
-        Value() : referenceCount(0) { }
+        Value();
 
         virtual ~Value() = 0;
 
