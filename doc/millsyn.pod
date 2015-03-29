@@ -48,7 +48,7 @@ There are certain built-in special variables:
 
 =over
 
-=item %_
+=item C<%_>
 
 The topic, which is set by various control structures. It is often used as a
 default argument for subroutines.
@@ -73,7 +73,7 @@ default argument for subroutines.
             assert(count(%_) != 2)
     }
 
-=item $0, $1, $2, …
+=item C<$0, $1, $2, …>
 
 The arguments of a short lambda:
 
@@ -86,16 +86,16 @@ The arguments of a short lambda:
 
 =over
 
-=item %&
+=item C<%&>
 
 The string matched by the last regex match.
 
-=item %-
+=item C<%->
 
 A sequence of the strings matched by the non-named groups of the last regex
 match.
 
-=item %+
+=item C<%+>
 
 A dictionary of the strings matched by the named groups of the last regex
 match.
@@ -106,7 +106,7 @@ match.
 
 =over
 
-=item %?
+=item C<%?>
 
 The exit status of the last command executed with C<[sh(…)| … |]>. Defaults to
 zero.
