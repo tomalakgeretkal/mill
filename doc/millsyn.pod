@@ -6,4 +6,32 @@ millsyn - Mill syntax
 
 Mill has a syntax.
 
+=head2 Variables
+
+A variable is defined using the C<let> keyword, for example:
+
+    let food = "orange"
+    let (source, age) = ("orange tree", months(1))
+
+Variables defined with C<let> are immutable unless their names start with C<$>
+or C<%>:
+
+    let food = "orange"
+    let $age = months(1)
+    let %rotten = false
+    food = "apple" # error: attempt to assign immutable variable
+    $age = $age + years(1) # ok
+    %rotten = true # ok
+
+The difference between C<$> and C<%> is that when the name of a variable starts
+with C<%>, its value is reset at the end of the scope:
+
+    let ($a, %b) = (1, 2)
+    {
+        $a = 3
+        %b = 4
+    }
+    p($a) # prints 3
+    p(%b) # prints 2
+
 =cut
