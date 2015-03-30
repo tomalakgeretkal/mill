@@ -1,9 +1,12 @@
 #pragma once
 #include <algorithm>
+#include <baka/io/io_error.hpp>
 #include <boost/intrusive_ptr.hpp>
 #include <cstdarg>
+#include <cstddef>
 #include <cstdint>
 #include "instructions.hpp"
+#include <llvm/Analysis/Passes.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/JIT.h>
 #include <llvm/IR/BasicBlock.h>
@@ -11,14 +14,18 @@
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/LegacyPassManager.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Type.h>
 #include <llvm/IR/Value.h>
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/TargetSelect.h>
+#include <llvm/Transforms/Scalar.h>
+#include <mutex>
 #include "object.hpp"
-#include <stack>
+#include <string>
+#include <unordered_map>
 #include <vector>
 #include "value.hpp"
 #include "vm.hpp"
@@ -33,36 +40,61 @@ namespace mill {
 
             llvm::Function* operator()() {
                 auto functionConstant = module->getOrInsertFunction(
-                    "main",
+                    std::to_string(uniqueID()),
                     valueType(),
                     llvm::Type::getInt8PtrTy(*ctx),
                     llvm::Type::getInt64Ty(*ctx),
                     llvm::PointerType::getUnqual(valueType()),
                     nullptr
                 );
-                auto function = llvm::cast<llvm::Function>(functionConstant);
+                function = llvm::cast<llvm::Function>(functionConstant);
 
                 auto entry = llvm::BasicBlock::Create(*ctx, "", function);
                 builder.SetInsertPoint(entry);
 
-                readInstruction(*source, *this);
-                readInstruction(*source, *this);
-                readInstruction(*source, *this);
-                readInstruction(*source, *this);
-                readInstruction(*source, *this);
-                readInstruction(*source, *this);
+                stack = builder.CreateAlloca(
+                    valueType(),
+                    llvm::ConstantInt::get(llvm::Type::getInt64Ty(*ctx), 32)
+                );
+                stackSize = builder.CreateAlloca(
+                    llvm::Type::getInt32Ty(*ctx),
+                    llvm::ConstantInt::get(llvm::Type::getInt64Ty(*ctx), 1)
+                );
+                builder.CreateStore(
+                    llvm::ConstantInt::get(llvm::Type::getInt32Ty(*ctx), 0),
+                    stackSize
+                );
+
+                try {
+                    for (;;) {
+                        readInstruction(*source, *this);
+                    }
+                } catch (baka::io::eof_error const&) { }
+
+                llvm::legacy::FunctionPassManager fpm(module);
+                fpm.add(llvm::createPromoteMemoryToRegisterPass());
+                fpm.add(llvm::createInstructionCombiningPass());
+                fpm.add(llvm::createGVNPass());
+                fpm.add(llvm::createCFGSimplificationPass());
+                fpm.doInitialization();
+
+                for (auto it = module->begin(); it != module->end(); ++it) {
+                    fpm.run(*it);
+                }
 
                 return function;
             }
 
             void visitPushGlobal(std::uint32_t nameIndex) {
                 auto ptr = vm->global(*object, nameIndex).get();
-                stack.push(pointerLiteral(ptr));
+                push(pointerLiteral(ptr));
+                emitRetain(top());
             }
 
             void visitPushString(std::uint32_t index) {
                 auto ptr = vm->string(*object, index).get();
-                stack.push(pointerLiteral(ptr));
+                push(pointerLiteral(ptr));
+                emitRetain(top());
             }
 
             void visitPushBoolean(std::uint8_t) {
@@ -70,25 +102,38 @@ namespace mill {
             }
 
             void visitPushUnit() {
-                auto unit = make<Unit>();
-                retain(*unit); // TODO: Fix memory leak.
-                stack.push(pointerLiteral(unit.get()));
+                push(pointerLiteral(&Unit::instance()));
+                emitRetain(top());
+            }
+
+            void visitPushParameter(std::uint32_t index) {
+                auto argv = &*++++function->getArgumentList().begin();
+                auto argPtr = builder.CreateGEP(argv, {
+                    llvm::ConstantInt::get(llvm::Type::getInt64Ty(*ctx), index)
+                });
+                push(builder.CreateLoad(argPtr));
+                emitRetain(top());
             }
 
             void visitPop() {
-                stack.pop();
+                emitRelease(pop());
+            }
+
+            void visitSwap() {
+                auto a = pop();
+                auto b = pop();
+                push(a);
+                push(b);
             }
 
             void visitCall(std::uint32_t argc) {
                 std::vector<llvm::Value*> argv(argc);
                 for (decltype(argc) i = 0; i < argc; ++i) {
-                    argv[i] = stack.top();
-                    stack.pop();
+                    argv[i] = pop();
                 }
                 std::reverse(argv.begin(), argv.end());
 
-                auto callee = stack.top();
-                stack.pop();
+                auto callee = pop();
 
                 auto llvmThunkI8Ptr = pointerLiteral(reinterpret_cast<void*>(callThunk));
                 auto llvmThunkPtr = builder.CreatePointerCast(
@@ -114,12 +159,24 @@ namespace mill {
                 for (auto&& arg : argv) {
                     llvmArgv.push_back(arg);
                 }
-                stack.push(builder.CreateCall(llvmThunkPtr, llvmArgv));
+                push(builder.CreateCall(llvmThunkPtr, llvmArgv));
+
+                for (auto it = argv.rbegin(); it != argv.rend(); ++it) {
+                    emitRelease(*it);
+                }
+                emitRelease(callee);
             }
 
             void visitReturn() {
-                builder.CreateRet(stack.top());
-                stack.pop();
+                builder.CreateRet(top());
+            }
+
+            void visitUnconditionalJump(std::uint32_t) {
+                assert(0);
+            }
+
+            void visitConditionalJump(std::uint32_t) {
+                assert(0);
             }
 
         private:
@@ -129,7 +186,16 @@ namespace mill {
             llvm::Module* module;
             llvm::IRBuilder<> builder;
             ReaderSeeker* source;
-            std::stack<llvm::Value*> stack;
+            llvm::Function* function;
+            llvm::Value* stack;
+            llvm::Value* stackSize;
+
+            static auto uniqueID() {
+                static std::uintmax_t id = 0;
+                static std::mutex mutex;
+                std::lock_guard<decltype(mutex)> lock(mutex);
+                return ++id;
+            }
 
             static void* callThunk(void* vcallee, void* vvm, std::uint64_t vargc, ...) {
                 auto& callee = dynamic_cast<Subroutine&>(*static_cast<Value*>(vcallee));
@@ -143,16 +209,74 @@ namespace mill {
                 }
                 va_end(args);
 
-                return callee.value(vm, argc, argv.data()).get();
+                auto result = callee(vm, argc, argv.data());
+                retain(*result.get());
+                return result.get();
             }
 
-            llvm::Value* pointerLiteral(void const* ptr) {
+            void push(llvm::Value* value) {
+                auto stackSizeInt = builder.CreateLoad(stackSize);
+                auto newStackSize = builder.CreateAdd(
+                    stackSizeInt,
+                    llvm::ConstantInt::get(llvm::Type::getInt32Ty(*ctx), 1)
+                );
+                builder.CreateStore(newStackSize, stackSize);
+
+                auto entry = builder.CreateGEP(stack, {stackSizeInt});
+                builder.CreateStore(value, entry);
+            }
+
+            llvm::Value* pop() {
+                auto stackSizeInt = builder.CreateLoad(stackSize);
+                auto newStackSize = builder.CreateSub(
+                    stackSizeInt,
+                    llvm::ConstantInt::get(llvm::Type::getInt32Ty(*ctx), 1)
+                );
+                builder.CreateStore(newStackSize, stackSize);
+
+                auto entry = builder.CreateGEP(stack, {newStackSize});
+                return builder.CreateLoad(entry);
+            }
+
+            llvm::Value* top() {
+                auto stackSizeInt = builder.CreateLoad(stackSize);
+                auto topIndex = builder.CreateSub(
+                    stackSizeInt,
+                    llvm::ConstantInt::get(llvm::Type::getInt32Ty(*ctx), 1)
+                );
+                auto entry = builder.CreateGEP(stack, {topIndex});
+                return builder.CreateLoad(entry);
+            }
+
+            template<typename T>
+            llvm::Value* pointerLiteral(T const* ptr) {
+                return pointerLiteral(ptr, valueType());
+            }
+
+            template<typename T>
+            llvm::Value* pointerLiteral(T const* ptr, llvm::Type* type) {
                 auto llvmI64Ptr = llvm::ConstantInt::get(llvm::Type::getInt64Ty(*ctx), (std::uint64_t)ptr);
-                return llvm::ConstantExpr::getIntToPtr(llvmI64Ptr, valueType());
+                return llvm::ConstantExpr::getIntToPtr(llvmI64Ptr, type);
             }
 
             llvm::Type* valueType() {
                 return llvm::Type::getInt8PtrTy(*ctx);
+            }
+
+            void emitRetain(llvm::Value* value) {
+                auto retainPtr = pointerLiteral(
+                    +[] (void* v) { retain(*static_cast<Value*>(v)); },
+                    llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getVoidTy(*ctx), {valueType()}, false))
+                );
+                builder.CreateCall(retainPtr, value);
+            }
+
+            void emitRelease(llvm::Value* value) {
+                auto releasePtr = pointerLiteral(
+                    +[] (void* v) { release(*static_cast<Value*>(v)); },
+                    llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getVoidTy(*ctx), {valueType()}, false))
+                );
+                builder.CreateCall(releasePtr, value);
             }
         };
     }
@@ -161,7 +285,17 @@ namespace mill {
     auto jitCompile(VM& vm, Object const& object, ReaderSeeker& source) {
         static llvm::LLVMContext ctx;
         static auto module = new llvm::Module("main", ctx);
-        static auto engine = (llvm::InitializeNativeTarget(), llvm::EngineBuilder(module).create());
+        static llvm::ExecutionEngine* engine = nullptr;
+        static std::mutex mutex;
+        std::lock_guard<decltype(mutex)> lock(mutex);
+
+        if (!engine) {
+            llvm::InitializeNativeTarget();
+            auto builder = llvm::EngineBuilder(module);
+            auto target = builder.selectTarget();
+            target->Options.PrintMachineCode = 0;
+            engine = builder.create(target);
+        }
 
         detail::JITCompiler<ReaderSeeker> jitCompiler(vm, object, ctx, *module, source);
         auto llvmPointer = jitCompiler();

@@ -6,7 +6,18 @@ our @EXPORT_OK = 'resolve';
 
 sub resolve {
     my ($ast, $symbols) = @_;
-    $symbols //= {};
+    $symbols //= {
+        'infix~' => {
+            type => 'module_member_symbol',
+            module => ['std', 'always'],
+            member => 'infix~',
+        },
+        'String' => {
+            type => 'module_member_symbol',
+            module => ['std', 'always'],
+            member => 'String',
+        },
+    };
     my %visitors = (
         module => sub {
             ({ %$ast, decls => [map { resolve($_, $symbols) } @{$ast->{decls}}] });
@@ -26,7 +37,23 @@ sub resolve {
                 module => ['main'],
                 member => $ast->{name},
             };
-            ({ %$ast, body => resolve($ast->{body}, { %$symbols }) });
+            my %body_symbols = %$symbols;
+            for (0..$#{$ast->{params}}) {
+                $body_symbols{$ast->{params}->[$_]->{name}} = {
+                    type => 'parameter_symbol',
+                    index => $_,
+                };
+            }
+            return {
+                %$ast,
+                params => [map {
+                    {
+                        name => $_->{name},
+                        type => resolve($_->{type}, { %$symbols }),
+                    };
+                } @{$ast->{params}}],
+                body => resolve($ast->{body}, { %body_symbols }),
+            };
         },
 
         main_decl => sub {
@@ -34,11 +61,19 @@ sub resolve {
         },
 
         call_expr => sub {
-            ({
+            return {
                 %$ast,
                 callee => resolve($ast->{callee}, { %$symbols }),
                 arguments => [map { resolve($_, { %$symbols }) } @{$ast->{arguments}}],
-            });
+            };
+        },
+
+        infix_expr => sub {
+            return {
+                %$ast,
+                callee => resolve($ast->{callee}, { %$symbols }),
+                arguments => [map { resolve($_, { %$symbols }) } @{$ast->{arguments}}],
+            };
         },
 
         name_expr => sub {
@@ -46,14 +81,26 @@ sub resolve {
             if (@name == 1) {
                 my $symbol = $symbols->{$name[0]};
                 die "name $name[0] not in scope" if !$symbol;
-                ({
-                    %$ast,
-                    name => {
-                        type => 'module_member',
-                        module => ['main'],
-                        member => $name[0],
-                    },
-                });
+                if ($symbol->{type} eq 'module_member_symbol') {
+                    return {
+                        %$ast,
+                        name => {
+                            type => 'module_member',
+                            module => $symbol->{module},
+                            member => $symbol->{member},
+                        },
+                    };
+                } elsif ($symbol->{type} eq 'parameter_symbol') {
+                    return {
+                        %$ast,
+                        name => {
+                            type => 'parameter',
+                            index => $symbol->{index},
+                        },
+                    };
+                } else {
+                    ...
+                }
             } elsif (@name == 2) {
                 my ($base, $member) = @{$ast->{name}};
                 my $symbol = $symbols->{$base};

@@ -1,5 +1,6 @@
 package Millc::Parse;
 use Exporter 'import';
+use List::Util 'reduce';
 use Modern::Perl;
 
 our @EXPORT_OK = qw(parse);
@@ -74,9 +75,20 @@ sub proc_decl {
     expect('proc');
     my $name = expect('identifier')->{value};
     expect('left_parenthesis');
+    my @params = eval { try sub {
+        my $name = expect('identifier')->{value};
+        expect('colon');
+        my $type = expr();
+        { name => $name, type => $type };
+    } };
     expect('right_parenthesis');
     my $body = block_expr();
-    { type => 'proc_decl', name => $name, body => $body };
+    {
+        type => 'proc_decl',
+        name => $name,
+        params => \@params,
+        body => $body,
+    };
 }
 
 sub main_decl {
@@ -86,7 +98,23 @@ sub main_decl {
 }
 
 sub expr {
-    call_like_expr();
+    add_expr();
+}
+
+sub add_expr {
+    my @operands = (call_like_expr(), @{many(sub {
+        expect('tilde');
+        call_like_expr();
+    })});
+    use Data::Dumper;
+    reduce { ({
+        type => 'infix_expr',
+        callee => {
+            type => 'name_expr',
+            name => ['infix~'],
+        },
+        arguments => [$a, $b],
+    }) } @operands;
 }
 
 sub call_like_expr {
@@ -142,7 +170,6 @@ sub expr_stmt {
 
 sub parse {
     my @tokens = @{shift()};
-    push @tokens, { type => 'eof' };
     my @decls = with_tokens \@tokens, sub {
         my $result = many(\&decl);
         expect('eof');

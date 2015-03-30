@@ -6,7 +6,8 @@ use Test::More tests => 1;
 my $hello_world = <<EOC;
 use std::io;
 
-proc f() { }
+proc f(x: String) { }
+proc g() { }
 
 MAIN {
     io::writeln("Hello, world!");
@@ -20,6 +21,21 @@ is_deeply(parse([lex($hello_world)]), {
         {
             type => 'proc_decl',
             name => 'f',
+            params => [
+                {
+                    name => 'x',
+                    type => {
+                        type => 'name_expr',
+                        name => ['String'],
+                    },
+                },
+            ],
+            body => { type => 'block_expr', stmts => [] },
+        },
+        {
+            type => 'proc_decl',
+            name => 'g',
+            params => [],
             body => { type => 'block_expr', stmts => [] },
         },
         {

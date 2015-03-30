@@ -1,3 +1,5 @@
+=encoding utf8
+
 =head1 NAME
 
 millsyn - Mill syntax
@@ -5,5 +7,120 @@ millsyn - Mill syntax
 =head1 DESCRIPTION
 
 Mill has a syntax.
+
+=head2 Keywords
+
+    CHECK DEINIT INIT MAIN case catch contravariant covariant default defer do
+    else ensure expose fail for func given goto if implement in infix invariant
+    is isnt last let match next postfix prefix proc protocol recursive redo
+    require return seq struct switch this try union use while yield
+
+=head2 Variables
+
+A variable is defined using the C<let> keyword, for example:
+
+    let food = "orange"
+    let (source, age) = ("orange tree", months(1))
+
+Variables defined with C<let> are immutable unless their names start with C<$>
+or C<%>:
+
+    let food = "orange"
+    let $age = months(1)
+    let %rotten = false
+    food = "apple" # error: attempt to assign immutable variable
+    $age = $age + years(1) # ok
+    %rotten = true # ok
+
+The difference between C<$> and C<%> is that when the name of a variable starts
+with C<%>, its value is reset at the end of the scope:
+
+    let ($a, %b) = (1, 2)
+    {
+        $a = 3
+        %b = 4
+    }
+    p($a) # prints 3
+    p(%b) # prints 2
+
+The value is reset even when an exception is thrown before the end of the scope
+is reached. Additionally, mutations to C<%> variables are visible only to the
+current thread, unlike mutations to C<$> variables.
+
+=head3 Special Variables
+
+There are certain built-in special variables. They cannot be assigned to unless
+specified otherwise.
+
+=head4 General Special Variables
+
+=over
+
+=item C<%_>
+
+The topic, which is set by various control structures. It is often used as a
+default argument for subroutines.
+
+    # proc outln(s: String = %_) { … }
+    # proc errln(s: String = %_) { … }
+
+    for list(1, 2, 3, 4, 5) {
+        p(%_)
+    }
+
+    given "Hello, world!" {
+        outln()
+        errln()
+    }
+
+    match list(1, 2) {
+        case list(_, _) =>
+            assert(count(%_) == 2)
+
+        case _ =>
+            assert(count(%_) != 2)
+    }
+
+C<%_> can be assigned to and in that case behaves like a normal C<%> variable.
+
+=item C<$0, $1, $2, …>
+
+The parameters of a short lambda:
+
+    let addmul = $($0 + $1 * $2)
+    p(addmul(3, 6, 8)) # 51
+
+=back
+
+=head4 Special Variables Related to Regexen
+
+=over
+
+=item C<$&>
+
+The string matched by the last regex match in the current thread.
+
+=item C<$->
+
+A sequence of the strings matched by the non-named groups of the last regex
+match in the current thread.
+
+=item C<$+>
+
+A dictionary of the strings matched by the named groups of the last regex
+match in the current thread.
+
+=back
+
+=head4 Special Variables Related to the Environment
+
+=over
+
+=item C<$?>
+
+The exit status of the last command executed with C<[sh(…)| … |]> in the
+current thread. Defaults to zero.
+
+=back
 
 =cut

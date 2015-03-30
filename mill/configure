@@ -33,6 +33,8 @@ w.variable('ldflags', ('''
     -stdlib=libc++
     -L ''' + llvm_config('--libdir') + '''
     ''' + llvm_config('--libs', 'all', '--system-libs') + '''
+    -lboost_system-mt
+    -lboost_thread-mt
 ''').replace('\n', ' '))
 
 w.rule('cxx', '$cxx $cxxflags -MMD -MF $out.d -c -o $out $in', depfile='$out.d')

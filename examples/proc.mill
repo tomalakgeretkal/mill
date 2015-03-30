@@ -1,14 +1,19 @@
+#!/usr/bin/env runmill
+#(
+A program which demonstrates how to define and call procedures.
+)
+
 use std::io;
 
-proc hi() {
-    io::writeln("Hello, world!");
+proc greet(name: String) {
+    io::writeln("Hello, " ~ name ~ "!");
 }
 
-proc bye() {
-    io::writeln("Goodbye, world!");
+proc ungreet(name: String) {
+    io::writeln("Goodbye, " ~ name ~ "!");
 }
 
 MAIN {
-    hi();
-    bye();
+    greet("rightfold");
+    ungreet("world");
 }

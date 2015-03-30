@@ -41,7 +41,11 @@ sub codegen_proc_decl {
     $bytecode_builder->pop();
     $bytecode_builder->push_unit();
     $bytecode_builder->return();
-    $object_builder->subroutine($proc_decl->{name}, 0, $body);
+    $object_builder->subroutine(
+        $proc_decl->{name},
+        scalar @{$proc_decl->{params}},
+        $body,
+    );
 }
 
 sub codegen_main_decl {
@@ -58,12 +62,22 @@ sub codegen_main_decl {
 sub codegen_expr {
     my $expr = shift;
     my %codegens = (
+        infix_expr => \&codegen_call_expr,
         call_expr => \&codegen_call_expr,
         name_expr => \&codegen_name_expr,
         string_expr => \&codegen_string_expr,
         block_expr => \&codegen_block_expr,
     );
     $codegens{$expr->{type}}->($expr);
+}
+
+sub codegen_infix_expr {
+    my $infix_expr = shift;
+    codegen_expr($infix_expr->{arguments}->[0]);
+    codegen_expr($infix_expr->{callee});
+    $bytecode_builder->swap();
+    codegen_expr($infix_expr->{arguments}->[1]);
+    $bytecode_builder->call(2);
 }
 
 sub codegen_call_expr {
@@ -77,9 +91,15 @@ sub codegen_call_expr {
 
 sub codegen_name_expr {
     my $name = shift->{name};
-    my $fqname = join('::', @{$name->{module}}, $name->{member});
-    my $fqname_id = $object_builder->string($fqname);
-    $bytecode_builder->push_global($fqname_id);
+    if ($name->{type} eq 'module_member') {
+        my $fqname = join('::', @{$name->{module}}, $name->{member});
+        my $fqname_id = $object_builder->string($fqname);
+        $bytecode_builder->push_global($fqname_id);
+    } elsif ($name->{type} eq 'parameter') {
+        $bytecode_builder->push_parameter($name->{index});
+    } else {
+        ...
+    }
 }
 
 sub codegen_string_expr {
