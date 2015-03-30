@@ -12,8 +12,8 @@ Mill has a syntax.
 
     CHECK DEINIT INIT MAIN case catch check contravariant covariant default
     defer do else ensure expose fail for func given goto if implement in infix
-    invariant is isnt last let match next postfix prefix proc protocol redo
-    require return seq struct switch this try union use while yield
+    invariant is isnt last let match next postfix prefix proc protocol recur
+    redo require return seq struct switch this try union use while yield
 
 =head2 Variables
 
