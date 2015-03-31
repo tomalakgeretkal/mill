@@ -50,5 +50,15 @@ END {
     }
     print "}; // struct DummyInstructionVisitor"
 
+    print "template<typename T, typename V>"
+    print "struct DefaultInstructionVisitor {"
+    for (i in mnemonics) {
+        printf "template<typename... Args>"
+        printf "T visit%s(Args&&...) {", mnemonics[i]
+        print "    return static_cast<V*>(this)->visitDefault();"
+        print "} // visit" mnemonics[i]
+    }
+    print "}; // struct DefaultInstructionVisitor"
+
     print "} // namespace mill"
 }

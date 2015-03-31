@@ -22,10 +22,10 @@
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Transforms/Scalar.h>
+#include <map>
 #include <mutex>
 #include "object.hpp"
 #include <string>
-#include <unordered_map>
 #include <vector>
 #include "value.hpp"
 #include "vm.hpp"
@@ -50,7 +50,12 @@ namespace mill {
                 function = llvm::cast<llvm::Function>(functionConstant);
 
                 auto entry = llvm::BasicBlock::Create(*ctx, "", function);
+                auto fakeEntry = llvm::BasicBlock::Create(*ctx, "", function);
+
                 builder.SetInsertPoint(entry);
+                builder.CreateBr(fakeEntry);
+
+                builder.SetInsertPoint(fakeEntry);
 
                 stack = builder.CreateAlloca(
                     valueType(),
@@ -65,8 +70,16 @@ namespace mill {
                     stackSize
                 );
 
+                makeBlocks(function, fakeEntry);
+                source->seek_begin(0);
                 try {
                     for (;;) {
+                        auto oldBlock = builder.GetInsertBlock();
+                        auto newBlock = blockAt(source->tell());
+                        if (newBlock != oldBlock && !oldBlock->back().isTerminator()) {
+                            builder.CreateBr(newBlock);
+                        }
+                        builder.SetInsertPoint(newBlock);
                         readInstruction(*source, *this);
                     }
                 } catch (baka::io::eof_error const&) { }
@@ -85,6 +98,40 @@ namespace mill {
                 return function;
             }
 
+            void makeBlocks(llvm::Function* function, llvm::BasicBlock* entry) {
+                blocks.emplace(0, entry);
+                class Visitor : public DefaultInstructionVisitor<void, Visitor> {
+                public:
+                    Visitor(JITCompiler& self, llvm::Function* function)
+                        : self(&self), function(function) { }
+
+                    void visitDefault() { }
+
+                    void visitConditionalJump(std::uint32_t offset) {
+                        addBlock(offset);
+                        addBlock(self->source->tell());
+                    }
+
+                    void visitUnconditionalJump(std::uint32_t offset) {
+                        addBlock(offset);
+                    }
+
+                    void addBlock(std::uint32_t offset) {
+                        if (!self->blocks.count(offset)) {
+                            self->blocks.emplace(offset, llvm::BasicBlock::Create(*self->ctx, "", function));
+                        }
+                    }
+
+                    JITCompiler* self;
+                    llvm::Function* function;
+                } visitor(*this, function);
+                try {
+                    for (;;) {
+                        readInstruction(*source, visitor);
+                    }
+                } catch (baka::io::eof_error const&) { }
+            }
+
             void visitPushGlobal(std::uint32_t nameIndex) {
                 auto ptr = vm->global(*object, nameIndex).get();
                 push(pointerLiteral(ptr));
@@ -97,8 +144,10 @@ namespace mill {
                 emitRetain(top());
             }
 
-            void visitPushBoolean(std::uint8_t) {
-                assert(0);
+            void visitPushBoolean(std::uint8_t value) {
+                auto boolean = make<Boolean>(!!value);
+                retain(*boolean); // TODO: Fix memory leak;
+                push(pointerLiteral(boolean.get()));
             }
 
             void visitPushUnit() {
@@ -171,25 +220,24 @@ namespace mill {
                 builder.CreateRet(top());
             }
 
-            void visitUnconditionalJump(std::uint32_t) {
-                assert(0);
+            void visitUnconditionalJump(std::uint32_t offset) {
+                builder.CreateBr(blockAt(offset));
             }
 
-            void visitConditionalJump(std::uint32_t) {
-                assert(0);
+            void visitConditionalJump(std::uint32_t offset) {
+                auto conditionValue = pop();
+                auto extractorPtr = builder.CreatePointerCast(
+                    pointerLiteral(+[] (void* value) -> char {
+                        return dynamic_cast<Boolean&>(*static_cast<Value*>(value)).value;
+                    }),
+                    llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt8Ty(*ctx), { valueType() }, false))
+                );
+                auto conditionI8 = builder.CreateCall(extractorPtr, conditionValue);
+                auto condition = builder.CreateICmpNE(conditionI8, llvm::ConstantInt::get(llvm::Type::getInt8Ty(*ctx), 0));
+                builder.CreateCondBr(condition, blockAt(offset), blockAt(source->tell()));
             }
 
         private:
-            VM* vm;
-            Object const* object;
-            llvm::LLVMContext* ctx;
-            llvm::Module* module;
-            llvm::IRBuilder<> builder;
-            ReaderSeeker* source;
-            llvm::Function* function;
-            llvm::Value* stack;
-            llvm::Value* stackSize;
-
             static auto uniqueID() {
                 static std::uintmax_t id = 0;
                 static std::mutex mutex;
@@ -278,6 +326,29 @@ namespace mill {
                 );
                 builder.CreateCall(releasePtr, value);
             }
+
+            llvm::BasicBlock* blockAt(std::size_t offset) {
+                auto block = blocks.begin()->second;
+                for (auto&& pair : blocks) {
+                    if (offset < pair.first) {
+                        break;
+                    } else {
+                        block = pair.second;
+                    }
+                }
+                return block;
+            }
+
+            VM* vm;
+            Object const* object;
+            llvm::LLVMContext* ctx;
+            llvm::Module* module;
+            llvm::IRBuilder<> builder;
+            ReaderSeeker* source;
+            llvm::Function* function;
+            llvm::Value* stack;
+            llvm::Value* stackSize;
+            std::map<std::size_t, llvm::BasicBlock*> blocks;
         };
     }
 
