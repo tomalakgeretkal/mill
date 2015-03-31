@@ -26,6 +26,7 @@
 #include <mutex>
 #include "object.hpp"
 #include <string>
+#include "util.hpp"
 #include <vector>
 #include "value.hpp"
 #include "vm.hpp"
@@ -328,15 +329,7 @@ namespace mill {
             }
 
             llvm::BasicBlock* blockAt(std::size_t offset) {
-                auto block = blocks.begin()->second;
-                for (auto&& pair : blocks) {
-                    if (offset < pair.first) {
-                        break;
-                    } else {
-                        block = pair.second;
-                    }
-                }
-                return block;
+                return largestBeforeOrEqual(blocks, offset)->second;
             }
 
             VM* vm;
