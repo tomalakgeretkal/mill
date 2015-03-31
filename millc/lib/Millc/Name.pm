@@ -131,7 +131,7 @@ sub resolve {
                 %$ast,
                 condition => resolve($ast->{condition}, $symbols),
                 then => resolve($ast->{then}, $symbols),
-                else => resolve($ast->{else}, $symbols),
+                else => $ast->{else} && resolve($ast->{else}, $symbols),
             };
         },
 

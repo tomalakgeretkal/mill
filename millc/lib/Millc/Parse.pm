@@ -160,8 +160,10 @@ sub if_expr {
     expect('if');
     my $condition = expr();
     my $then = block_expr();
-    expect('else');
-    my $else = block_expr();
+    my $else = eval { try sub {
+        expect('else');
+        my $else = block_expr();
+    } };
     { type => 'if_expr', condition => $condition, then => $then, else => $else };
 }
 

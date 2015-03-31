@@ -12,4 +12,12 @@ MAIN {
     } else {
         io::writeln("OK");
     };
+
+    if true {
+        io::writeln("OK");
+    };
+
+    if false {
+        io::writeln("ERROR");
+    };
 }

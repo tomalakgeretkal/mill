@@ -134,7 +134,11 @@ sub codegen_if_expr {
     codegen_expr($if_expr->{condition});
     $bytecode_builder->conditional_jump($then_label);
 
-    codegen_expr($if_expr->{else});
+    if (defined $if_expr->{else}) {
+        codegen_expr($if_expr->{else});
+    } else {
+        $bytecode_builder->push_unit();
+    }
     $bytecode_builder->unconditional_jump($endif_label);
 
     $bytecode_builder->save_label($then_label);
