@@ -15,6 +15,19 @@ Mill has a syntax.
     invariant is isnt last let match next postfix prefix proc protocol recur
     redo require return seq struct switch this try union use while yield
 
+=head2 Whitespace
+
+Every space (U+0020) and newline (U+000A) is treated as whitespace. Whitespace
+is ignored except when it separates tokens that would otherwise form a single
+token.
+
+=head3 Comments
+
+Both single-line and multiline comments are supported. Single-line comments
+start with C<#> and extend to the end of the line. Multiline comments start
+with C<#(> and extend to C<)>. The parentheses in multiline comments must
+match. Comments are considered whitespace.
+
 =head2 Variables
 
 A variable is defined using the C<let> keyword, for example:
