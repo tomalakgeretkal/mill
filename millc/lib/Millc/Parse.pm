@@ -102,18 +102,24 @@ sub expr {
 }
 
 sub add_expr {
+    my %operators = (
+        '~' => 'tilde',
+        '+' => 'plus',
+        '-' => 'minus',
+    );
     my @operands = (call_like_expr(), @{many(sub {
-        expect('tilde');
-        call_like_expr();
+        [
+            one_of(map { my $x = $_; sub { expect($operators{$x}); $x } } keys %operators),
+            call_like_expr(),
+        ];
     })});
-    use Data::Dumper;
     reduce { ({
         type => 'infix_expr',
         callee => {
             type => 'name_expr',
-            name => ['infix~'],
+            name => ['infix' . $b->[0]],
         },
-        arguments => [$a, $b],
+        arguments => [$a, $b->[1]],
     }) } @operands;
 }
 

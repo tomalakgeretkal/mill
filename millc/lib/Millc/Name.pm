@@ -12,10 +12,25 @@ sub resolve {
             module => ['std', 'always'],
             member => 'infix~',
         },
+        'infix+' => {
+            type => 'module_member_symbol',
+            module => ['std', 'always'],
+            member => 'infix+',
+        },
+        'infix-' => {
+            type => 'module_member_symbol',
+            module => ['std', 'always'],
+            member => 'infix-',
+        },
         'String' => {
             type => 'module_member_symbol',
             module => ['std', 'always'],
             member => 'String',
+        },
+        'Z' => {
+            type => 'module_member_symbol',
+            module => ['std', 'always'],
+            member => 'Z',
         },
     };
     my %visitors = (

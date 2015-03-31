@@ -15,6 +15,8 @@ my @patterns = (
     [ qr/{/, 'left_brace' ],
     [ qr/}/, 'right_brace' ],
     [ qr/~/, 'tilde' ],
+    [ qr/\+/, 'plus' ],
+    [ qr/-/, 'minus' ],
 
     [ qr/".*?"/, 'string', sub { substr($_[0], 1, length($_[0]) - 2) } ],
 
