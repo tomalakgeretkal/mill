@@ -28,7 +28,17 @@ start with C<#> and extend to the end of the line. Multiline comments start
 with C<#(> and extend to C<)>. The parentheses in multiline comments must
 match. Comments are considered whitespace.
 
-=head2 Variables
+=head2 Declarations
+
+There are several forms of declarations: use declarations, variable
+declarations, subroutine declarations and type declarations.
+
+=head3 Use Declarations
+
+A use declaration imports a module or some members of a module into the current
+scope.
+
+=head3 Variable Declarations
 
 A variable is defined using the C<let> keyword, for example:
 
@@ -59,11 +69,6 @@ with C<%>, its value is reset at the end of the scope:
 The value is reset even when an exception is thrown before the end of the scope
 is reached. Additionally, mutations to C<%> variables are visible only to the
 current thread, unlike mutations to C<$> variables.
-
-=head3 Special Variables
-
-There are certain built-in special variables. They cannot be assigned to unless
-specified otherwise.
 
 =head4 General Special Variables
 
@@ -137,5 +142,16 @@ The exit status of the last command executed with C<[sh(…)| … |]> in the
 current thread. Defaults to zero.
 
 =back
+
+=head3 Subroutine Declarations
+
+A subroutine is a function or a procedure. Functions and procedures are
+identical except that a procedure ignores the value produced by its body and
+instead returns C<()>, and that the return type of a function must be specified
+whereas the return type of a procedure cannot be specified.
+
+=head3 Type Declarations
+
+A type declaration creates a type.
 
 =cut
