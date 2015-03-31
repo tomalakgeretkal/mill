@@ -90,6 +90,8 @@ The parameters of a short lambda:
     let addmul = $($0 + $1 * $2)
     p(addmul(3, 6, 8)) # 51
 
+These variables can be assigned to like normal C<$> variables.
+
 =back
 
 =head4 Special Variables Related to Regexen
