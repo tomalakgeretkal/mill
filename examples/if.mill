@@ -2,22 +2,22 @@ use std::io;
 
 MAIN {
     if true {
-        io::writeln("OK");
+        io::writeln("1: OK");
     } else {
-        io::writeln("ERROR");
+        io::writeln("1: WRONG");
     };
 
     if false {
-        io::writeln("ERROR");
+        io::writeln("2: WRONG");
     } else {
-        io::writeln("OK");
+        io::writeln("2: OK");
     };
 
     if true {
-        io::writeln("OK");
+        io::writeln("3: OK");
     };
 
     if false {
-        io::writeln("ERROR");
+        io::writeln("4: WRONG");
     };
 }
