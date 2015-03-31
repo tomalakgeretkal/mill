@@ -14,7 +14,9 @@ WriteMakefile(
         'Test::More' => 0,
     },
     PREREQ_PM => {
+        'Data::GUID' => 0.048,
         'Modern::Perl' => 1.20150127,
+        'Set::Scalar' => 1.29,
     },
     test => { TESTS => `zsh -c 'echo t/**/*.t'` },
     dist => { COMPRESS => 'gzip -9f', SUFFIX => 'gz' },

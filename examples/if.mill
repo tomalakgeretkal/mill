@@ -1,0 +1,15 @@
+use std::io;
+
+MAIN {
+    if true {
+        io::writeln("OK");
+    } else {
+        io::writeln("ERROR");
+    };
+
+    if false {
+        io::writeln("ERROR");
+    } else {
+        io::writeln("OK");
+    };
+}

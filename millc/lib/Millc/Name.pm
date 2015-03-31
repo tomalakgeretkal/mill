@@ -122,6 +122,19 @@ sub resolve {
             $ast;
         },
 
+        boolean_expr => sub {
+            $ast;
+        },
+
+        if_expr => sub {
+            return {
+                %$ast,
+                condition => resolve($ast->{condition}, $symbols),
+                then => resolve($ast->{then}, $symbols),
+                else => resolve($ast->{else}, $symbols),
+            };
+        },
+
         block_expr => sub {
             my $block_symbols = { %$symbols };
             ({ %$ast, stmts => [map { resolve($_, $block_symbols) } @{$ast->{stmts}}] });
