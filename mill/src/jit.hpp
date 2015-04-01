@@ -1,4 +1,7 @@
 #pragma once
+#if !MILL_ENABLE_JIT
+#error JIT-compiler is not enabled!
+#endif
 #include <algorithm>
 #include <baka/io/io_error.hpp>
 #include <boost/intrusive_ptr.hpp>
