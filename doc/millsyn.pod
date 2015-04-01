@@ -100,8 +100,6 @@ default argument for subroutines.
             assert(count(%_) != 2)
     }
 
-C<%_> can be assigned to and in that case behaves like a normal C<%> variable.
-
 =item C<$0, $1, $2, …>
 
 The parameters of a short lambda:
@@ -154,5 +152,45 @@ whereas the return type of a procedure cannot be specified.
 =head3 Type Declarations
 
 A type declaration creates a type.
+
+=head2 Expressions
+
+=head3 Given Expressions
+
+A given expression sets C<%_> to some value.
+
+    given "Hello, world!" {
+        outln()
+        errln()
+    }
+
+    f(%_) + g(%_) given h()
+
+=head3 If Expressions
+
+An if expression consists of a condition and one or two branches. Which branch
+is executed depends on the condition. The second branch defaults to unit if
+it's not given explicitly. Every if expression has the precondition that the
+condition is a Boolean.
+
+    func abs(x: Number): Number {
+        if x < 0 {
+            -x
+        } else {
+            x
+        }
+    }
+
+=head3 Switch Expressions
+
+=head3 Match Expressions
+
+=head3 For Expressions
+
+=head3 While Expressions
+
+=head3 Check Expressions
+
+=head3 Try and Fail Expressions
 
 =cut
