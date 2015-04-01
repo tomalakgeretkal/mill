@@ -7,6 +7,7 @@
 #include <memory>
 #include "object.hpp"
 #include <string>
+#include <thread>
 #include <utility>
 #include "value.hpp"
 #include "vm.hpp"
@@ -69,6 +70,6 @@ std::future<boost::intrusive_ptr<mill::Value>> mill::VM::call(Value* value, std:
         return dynamic_cast<Subroutine&>(*value)(*this, argc, argv);
     });
     auto result = task.get_future();
-    threadPool.post(std::move(task));
+    std::thread(std::move(task)).detach();
     return result;
 }
