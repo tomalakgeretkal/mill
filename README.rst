@@ -18,7 +18,7 @@ Influence
 
 Mill takes ideas from many languages, in no particular order:
 
-- Clojure: protocols.
+- Clojure: dynamic variables, protocols.
 - D: contracts, exceptions.
 - Eiffel: contracts, CQS.
 - Elixir: pipelines.
