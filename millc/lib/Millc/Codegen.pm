@@ -66,7 +66,9 @@ sub codegen_expr {
         call_expr => \&codegen_call_expr,
         name_expr => \&codegen_name_expr,
         string_expr => \&codegen_string_expr,
+        boolean_expr => \&codegen_boolean_expr,
         block_expr => \&codegen_block_expr,
+        if_expr => \&codegen_if_expr,
     );
     $codegens{$expr->{type}}->($expr);
 }
@@ -108,6 +110,11 @@ sub codegen_string_expr {
     $bytecode_builder->push_string($string_id);
 }
 
+sub codegen_boolean_expr {
+    my $value = shift->{value};
+    $bytecode_builder->push_boolean($value);
+}
+
 sub codegen_block_expr {
     my @stmts = @{shift->{stmts}};
     for (0..$#stmts) {
@@ -116,6 +123,28 @@ sub codegen_block_expr {
             $bytecode_builder->pop();
         }
     }
+}
+
+sub codegen_if_expr {
+    my $if_expr = shift;
+
+    my $then_label = $bytecode_builder->fresh_label();
+    my $endif_label = $bytecode_builder->fresh_label();
+
+    codegen_expr($if_expr->{condition});
+    $bytecode_builder->conditional_jump($then_label);
+
+    if (defined $if_expr->{else}) {
+        codegen_expr($if_expr->{else});
+    } else {
+        $bytecode_builder->push_unit();
+    }
+    $bytecode_builder->unconditional_jump($endif_label);
+
+    $bytecode_builder->save_label($then_label);
+    codegen_expr($if_expr->{then});
+
+    $bytecode_builder->save_label($endif_label);
 }
 
 sub codegen_stmt {

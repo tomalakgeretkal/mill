@@ -102,18 +102,24 @@ sub expr {
 }
 
 sub add_expr {
+    my %operators = (
+        '~' => 'tilde',
+        '+' => 'plus',
+        '-' => 'minus',
+    );
     my @operands = (call_like_expr(), @{many(sub {
-        expect('tilde');
-        call_like_expr();
+        [
+            one_of(map { my $x = $_; sub { expect($operators{$x}); $x } } keys %operators),
+            call_like_expr(),
+        ];
     })});
-    use Data::Dumper;
     reduce { ({
         type => 'infix_expr',
         callee => {
             type => 'name_expr',
-            name => ['infix~'],
+            name => ['infix' . $b->[0]],
         },
-        arguments => [$a, $b],
+        arguments => [$a, $b->[1]],
     }) } @operands;
 }
 
@@ -134,7 +140,7 @@ sub call_expr {
 }
 
 sub primary_expr {
-    one_of(\&name_expr, \&string_expr, \&block_expr);
+    one_of(\&name_expr, \&string_expr, \&boolean_expr, \&if_expr, \&block_expr);
 }
 
 sub name_expr {
@@ -149,6 +155,22 @@ sub name_expr {
 sub string_expr {
     my $value = expect('string')->{value};
     { type => 'string_expr', value => $value };
+}
+
+sub boolean_expr {
+    my $value = expect('boolean')->{value};
+    { type => 'boolean_expr', value => $value };
+}
+
+sub if_expr {
+    expect('if');
+    my $condition = expr();
+    my $then = block_expr();
+    my $else = eval { try sub {
+        expect('else');
+        my $else = block_expr();
+    } };
+    { type => 'if_expr', condition => $condition, then => $then, else => $else };
 }
 
 sub block_expr {

@@ -23,7 +23,7 @@ void mill::VM::loadObject(Object const& object) {
     for (auto&& subroutine : object.subroutines) {
         auto const& body = subroutine.body;
         auto& subroutineGlobal = globals[object.strings[object.name] + "::" + object.strings[subroutine.name]];
-        subroutineGlobal = make<Subroutine>([this, callCount = std::make_shared<std::atomic<long>>(), &object, &body, &subroutineGlobal]
+        subroutineGlobal = make<Subroutine>([this, callCount = std::make_shared<std::atomic<long>>(0), &object, &body, &subroutineGlobal]
                                             (VM& vm, std::size_t argc, Value** argv) mutable {
             if ((*callCount)++ == jitThreshold) {
                 baka::io::memory_stream bodyReader;

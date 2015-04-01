@@ -12,10 +12,25 @@ sub resolve {
             module => ['std', 'always'],
             member => 'infix~',
         },
+        'infix+' => {
+            type => 'module_member_symbol',
+            module => ['std', 'always'],
+            member => 'infix+',
+        },
+        'infix-' => {
+            type => 'module_member_symbol',
+            module => ['std', 'always'],
+            member => 'infix-',
+        },
         'String' => {
             type => 'module_member_symbol',
             module => ['std', 'always'],
             member => 'String',
+        },
+        'Z' => {
+            type => 'module_member_symbol',
+            module => ['std', 'always'],
+            member => 'Z',
         },
     };
     my %visitors = (
@@ -120,6 +135,19 @@ sub resolve {
 
         string_expr => sub {
             $ast;
+        },
+
+        boolean_expr => sub {
+            $ast;
+        },
+
+        if_expr => sub {
+            return {
+                %$ast,
+                condition => resolve($ast->{condition}, $symbols),
+                then => resolve($ast->{then}, $symbols),
+                else => $ast->{else} && resolve($ast->{else}, $symbols),
+            };
         },
 
         block_expr => sub {
