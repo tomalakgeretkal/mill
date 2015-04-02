@@ -1,7 +1,5 @@
-use std::io;
-
-proc f(x: String) {
-    io::writeln(x);
+proc f() {
+    f();
 }
 
 MAIN {
