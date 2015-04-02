@@ -7,6 +7,7 @@ our @EXPORT_OK = qw(lex);
 
 my @patterns = (
     [ qr/::/, 'colon_colon' ],
+    [ qr/==/, 'eq_eq' ],
     [ qr/:/, 'colon' ],
     [ qr/;/, 'semicolon' ],
     [ qr/\./, 'period' ],

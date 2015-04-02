@@ -3,7 +3,6 @@
 #include <baka/io/file_stream.hpp>
 #include <cstddef>
 #include <fcntl.h>
-#include <future>
 #include "interpreter.hpp"
 #include "disassemble.hpp"
 #include <iostream>
@@ -14,7 +13,6 @@
 #include <unistd.h>
 #include <utility>
 #include "value.hpp"
-#include <vector>
 #include "vm.hpp"
 
 using namespace mill;
@@ -51,17 +49,7 @@ int main(int argc, char const** argv) {
         return make<Boolean>(a.value == b.value);
     }));
 
-    std::vector<std::future<boost::intrusive_ptr<Value>>> results;
-    for (auto i = 0; i < 100; ++i) {
-        results.push_back(vm.call(vm.global("main::MAIN").get(), 0, nullptr));
-    }
-    sleep(1);
-    for (auto i = 0; i < 100; ++i) {
-        results.push_back(vm.call(vm.global("main::MAIN").get(), 0, nullptr));
-    }
-    for (auto&& result : results) {
-        result.get();
-    }
+    vm.call(vm.global("main::MAIN").get(), 0, nullptr).get();
 
     return 0;
 }

@@ -98,7 +98,27 @@ sub main_decl {
 }
 
 sub expr {
-    add_expr();
+    cmp_expr();
+}
+
+sub cmp_expr {
+    my %operators = (
+        '==' => 'eq_eq',
+    );
+    my @operands = (add_expr(), @{many(sub {
+        [
+            one_of(map { my $x = $_; sub { expect($operators{$x}); $x } } keys %operators),
+            add_expr(),
+        ];
+    })});
+    reduce { ({
+        type => 'infix_expr',
+        callee => {
+            type => 'name_expr',
+            name => ['infix' . $b->[0]],
+        },
+        arguments => [$a, $b->[1]],
+    }) } @operands;
 }
 
 sub add_expr {
