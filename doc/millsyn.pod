@@ -12,7 +12,7 @@ Mill has a syntax.
 
     _ CHECK LOAD MAIN UNLOAD case catch check cmp default defer do else ensure
     eq expose fail false for func ge given goto gt if implement in infix
-    invariant is isnt last le let lt match ne new next old out postfix prefix
+    invariant is isn't last le let lt match ne new next old out postfix prefix
     proc protocol recur redo ref require return select seq struct switch this
     true try union use while yield
 
