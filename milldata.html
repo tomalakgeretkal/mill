@@ -33,13 +33,62 @@
 
 <p>The bottom type is typically used as the return type for subroutines that never return, and as the exception specification for subroutines that never throw.</p>
 
+<p>The top type is <code>std::always::Any</code> and the bottom type is <code>std::always::Bottom</code>.</p>
+
 <h3 id="Protocol-Types">Protocol Types</h3>
 
 <p>A protocol type defines a set of subroutines which can be overloaded by a protocol implementation. A protocol implementation overloads these subroutines for some type, making that type a subtype of the protocol type.</p>
 
+<pre><code>    protocol Monitor {
+        proc start(monitor: this) ensure !stopped(monitor)
+        proc stop(monitor: this) ensure stopped(monitor)
+        func running(monitor: this): Boolean
+    }
+
+    struct PingMonitor {
+        address: Address
+        interval: Duration
+    }
+
+    implement Monitor for PingMonitor {
+        proc start(monitor: PingMonitor) { ... }
+        proc stop(monitor: PingMonitor) { ... }
+        proc running(monitor: PingMonitor) { ... }
+    }</code></pre>
+
 <h3 id="Structure-Types">Structure Types</h3>
 
 <p>A structure type defines a set of fields.</p>
+
+<pre><code>    struct User {
+        id: Int
+        name: String
+        birthday: LocalDate
+    }</code></pre>
+
+<p>A lens will be generated for each field.</p>
+
+<h3 id="Union-Types">Union Types</h3>
+
+<p>A union type represents one of many possible structures.</p>
+
+<pre><code>    union Option(T: in) {
+        Some(x: T)
+        None
+    }</code></pre>
+
+<p>Optionally, a union type can describe fields common to all variants:</p>
+
+<pre><code>    union Token {
+        common(position: Int)
+        Identifier(name: String)
+        StringLiteral(value: String)
+        EOF
+    }</code></pre>
+
+<p>The common fields will be inserted at the beginning of the field list for every variant.</p>
+
+<p>A lens will be generated for each common field. A prism will be generated for each non-common field.</p>
 
 <h2 id="Destruction">Destruction</h2>
 

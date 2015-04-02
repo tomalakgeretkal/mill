@@ -25,7 +25,31 @@
 
 <p>Mill has a syntax.</p>
 
-<h2 id="Variables">Variables</h2>
+<h2 id="Keywords">Keywords</h2>
+
+<pre><code>    _ CHECK LOAD MAIN UNLOAD case catch check default defer do else ensure
+    expose fail false for func given goto if implement in infix invariant is
+    isnt last let match new next old out postfix prefix proc protocol recur
+    redo ref require return select seq struct switch this true try union use
+    while yield</code></pre>
+
+<h2 id="Whitespace">Whitespace</h2>
+
+<p>Every space (U+0020) and newline (U+000A) is treated as whitespace. Whitespace is ignored except when it separates tokens that would otherwise form a single token.</p>
+
+<h3 id="Comments">Comments</h3>
+
+<p>Both single-line and multiline comments are supported. Single-line comments start with <code>#</code> and extend to the end of the line. Multiline comments start with <code>#(</code> and extend to <code>)</code>. The parentheses in multiline comments must match. Comments are considered whitespace.</p>
+
+<h2 id="Declarations">Declarations</h2>
+
+<p>There are several forms of declarations: use declarations, variable declarations, subroutine declarations and type declarations.</p>
+
+<h3 id="Use-Declarations">Use Declarations</h3>
+
+<p>A use declaration imports a module or some members of a module into the current scope.</p>
+
+<h3 id="Variable-Declarations">Variable Declarations</h3>
 
 <p>A variable is defined using the <code>let</code> keyword, for example:</p>
 
@@ -53,10 +77,6 @@
 
 <p>The value is reset even when an exception is thrown before the end of the scope is reached. Additionally, mutations to <code>%</code> variables are visible only to the current thread, unlike mutations to <code>$</code> variables.</p>
 
-<h3 id="Special-Variables">Special Variables</h3>
-
-<p>There are certain built-in special variables. They cannot be assigned to unless specified otherwise.</p>
-
 <h4 id="General-Special-Variables">General Special Variables</h4>
 
 <dl>
@@ -66,8 +86,8 @@
 
 <p>The topic, which is set by various control structures. It is often used as a default argument for subroutines.</p>
 
-<pre><code>    # proc outln(s: String = %_)
-    # proc errln(s: String = %_)
+<pre><code>    # proc outln(s: String = %_) { &hellip; }
+    # proc errln(s: String = %_) { &hellip; }
 
     for list(1, 2, 3, 4, 5) {
         p(%_)
@@ -86,16 +106,16 @@
             assert(count(%_) != 2)
     }</code></pre>
 
-<p><code>%_</code> can be assigned to and in that case behaves like a normal <code>%</code> variable.</p>
-
 </dd>
 <dt id="pod-0-1-2"><code>$0, $1, $2, &hellip;</code></dt>
 <dd>
 
-<p>The arguments of a short lambda:</p>
+<p>The parameters of a short lambda:</p>
 
 <pre><code>    let addmul = $($0 + $1 * $2)
     p(addmul(3, 6, 8)) # 51</code></pre>
+
+<p>These variables can be assigned to like normal <code>$</code> variables.</p>
 
 </dd>
 </dl>
@@ -135,6 +155,60 @@
 
 </dd>
 </dl>
+
+<h3 id="Subroutine-Declarations">Subroutine Declarations</h3>
+
+<p>A subroutine is a function or a procedure. Functions and procedures are identical except that a procedure ignores the value produced by its body and instead returns <code>()</code>, and that the return type of a function must be specified whereas the return type of a procedure cannot be specified.</p>
+
+<h3 id="Type-Declarations">Type Declarations</h3>
+
+<p>A type declaration creates a type.</p>
+
+<h2 id="Expressions">Expressions</h2>
+
+<h3 id="Given-Expressions">Given Expressions</h3>
+
+<p>A given expression sets <code>%_</code> to some value.</p>
+
+<pre><code>    given &quot;Hello, world!&quot; {
+        outln()
+        errln()
+    }
+
+    f(%_) + g(%_) given h()</code></pre>
+
+<h3 id="If-Expressions">If Expressions</h3>
+
+<p>An if expression consists of a condition and one or two branches. Which branch is executed depends on the condition. The second branch defaults to unit if it&#39;s not given explicitly. Every if expression has the precondition that the condition is a Boolean.</p>
+
+<pre><code>    func abs(x: Number): Number {
+        if x &lt; 0 {
+            -x
+        } else {
+            x
+        }
+    }</code></pre>
+
+<h3 id="Switch-Expressions">Switch Expressions</h3>
+
+<h3 id="Match-Expressions">Match Expressions</h3>
+
+<h3 id="Select-Expressions">Select Expressions</h3>
+
+<h3 id="For-Expressions">For Expressions</h3>
+
+<h3 id="While-Expressions">While Expressions</h3>
+
+<h3 id="Check-Expressions">Check Expressions</h3>
+
+<p>A <code>check</code> expression causes a contract violation if a condition is false.</p>
+
+<pre><code>    check false # contract violation
+    check true # ok</code></pre>
+
+<p>See millcont for more information.</p>
+
+<h3 id="Try-and-Fail-Expressions">Try and Fail Expressions</h3>
 
 
         </section>
