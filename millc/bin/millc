@@ -1,4 +1,8 @@
 #!/usr/bin/env perl
+BEGIN {
+    use File::Basename 'dirname';
+    unshift @INC, dirname(__FILE__) . '/../lib';
+}
 use File::Slurp;
 use Millc::BytecodeBuilder;
 use Millc::Codegen 'codegen';
