@@ -86,4 +86,36 @@ When the reference count of a Mill value reaches zero, the C<destruct>
 procedure in the C<mill> module is invoked if it is overloaded for the type of
 the value. The value is passed as the argument to C<destruct>.
 
+=head2 Equivalence and Ordering
+
+The C<identity> function (not to be confused with the identity function) takes
+a value and returns the identity of that value, which uniquely identifies it.
+This is important for mutable vs immutable values. For example, the C<identity>
+function returns the same value for C<1> and C<1>, but different ones for
+C<array()> and C<array()>, because arrays are mutable.
+
+There are various equivalence and ordering operators.
+
+=over
+
+=item C<is>, C<isn't>
+
+C<a is b> is true iff C<a> and C<b> have the same identity. It is false
+otherwise. C<isn't> is the opposite of C<is>.
+
+=item C<==>, C<!=>
+
+C<a == b> is true iff C<a> and C<b> have the type and the same structure. It is
+false if they do not have the same structure. It has a precondition that the
+values have the same type. This differs with C<is> for mutable values and for
+types with partial equivalence. For example, C<array() isn't array() && array()
+== array()>.
+
+=item C<eq>, C<ne>
+
+C<a eq b> is true iff C<a> and C<b> represent the same value. This is
+interesting in the case of numbers, for example, C<1 isn't 1.0 && 1 eq 1.0>.
+
+=back
+
 =cut
