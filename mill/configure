@@ -38,6 +38,7 @@ w.variable('ldflags', ('''
     ''' + (llvm_config('--libs', 'all', '--system-libs') if ENABLE_JIT else '') + '''
     -lboost_system-mt
     -lboost_thread-mt
+    -pthread
 ''').replace('\n', ' '))
 
 w.rule('cxx', '$cxx $cxxflags -MMD -MF $out.d -c -o $out $in', depfile='$out.d')
