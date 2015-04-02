@@ -60,7 +60,7 @@ A lens will be generated for each field.
 
 A union type represents one of many possible structures.
 
-    union Option(T: covariant) {
+    union Option(T: in) {
         Some(x: T)
         None
     }
