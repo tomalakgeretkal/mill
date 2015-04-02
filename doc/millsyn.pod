@@ -193,6 +193,13 @@ condition is a Boolean.
 
 =head3 Check Expressions
 
+A C<check> expression causes a contract violation if a condition is false.
+
+    check false # contract violation
+    check true # ok
+
+See millcont for more information.
+
 =head3 Try and Fail Expressions
 
 =cut
