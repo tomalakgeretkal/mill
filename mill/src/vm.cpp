@@ -3,16 +3,21 @@
 #include <boost/intrusive_ptr.hpp>
 #include <future>
 #include "interpreter.hpp"
+#if MILL_ENABLE_JIT
 #include "jit.hpp"
+#endif
 #include <memory>
 #include "object.hpp"
 #include <string>
+#include <thread>
 #include <utility>
 #include "value.hpp"
 #include "vm.hpp"
 
 namespace {
+#if MILL_ENABLE_JIT
     auto constexpr jitThreshold = 10;
+#endif
 }
 
 void mill::VM::loadObject(Object const& object) {
@@ -25,6 +30,10 @@ void mill::VM::loadObject(Object const& object) {
         auto& subroutineGlobal = globals[object.strings[object.name] + "::" + object.strings[subroutine.name]];
         subroutineGlobal = make<Subroutine>([this, callCount = std::make_shared<std::atomic<long>>(0), &object, &body, &subroutineGlobal]
                                             (VM& vm, std::size_t argc, Value** argv) mutable {
+#if !MILL_ENABLE_JIT
+    (void)argc;
+#endif
+#if MILL_ENABLE_JIT
             if ((*callCount)++ == jitThreshold) {
                 baka::io::memory_stream bodyReader;
                 bodyReader.write((char*)body.data(), (char*)body.data() + body.size());
@@ -36,11 +45,14 @@ void mill::VM::loadObject(Object const& object) {
 
                 return subroutineValue.fast(vm, argc, argv);
             } else {
+#endif
                 baka::io::memory_stream bodyReader;
                 bodyReader.write((char*)body.data(), (char*)body.data() + body.size());
                 bodyReader.seek_begin(0);
                 return interpret(vm, object, bodyReader, argv);
+#if MILL_ENABLE_JIT
             }
+#endif
         });
     }
 }
@@ -69,6 +81,6 @@ std::future<boost::intrusive_ptr<mill::Value>> mill::VM::call(Value* value, std:
         return dynamic_cast<Subroutine&>(*value)(*this, argc, argv);
     });
     auto result = task.get_future();
-    threadPool.post(std::move(task));
+    std::thread(std::move(task)).detach();
     return result;
 }

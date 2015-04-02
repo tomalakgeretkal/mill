@@ -4,7 +4,6 @@
 #include <future>
 #include "object.hpp"
 #include <string>
-#include "thread_pool.hpp"
 #include <unordered_map>
 #include "value.hpp"
 #include <vector>
@@ -25,7 +24,5 @@ namespace mill {
     private:
         std::unordered_map<Object const*, std::vector<boost::intrusive_ptr<Value>>> strings;
         std::unordered_map<std::string, boost::intrusive_ptr<Value>> globals;
-
-        ThreadPool threadPool;
     };
 }

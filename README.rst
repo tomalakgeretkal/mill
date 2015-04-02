@@ -2,25 +2,32 @@ Mill
 ====
 
 Mill is a dynamically typed programming language with a focus on clarity,
-concurrency and specification. It strives towards the following goals:
-
-- Lightweight threading.
-- Terrific interop with other languages.
-- Formal specification of preconditions, postconditions, exceptions, invariants
-  and types.
-- A focus on immutable variables and data structures.
-- A familiar, eye-pleasing syntax.
+concurrency and specification.
 
 Hello, world!
 -------------
 
-The hello world program is as follows::
-
-    use std::io;
+The hello world program reads as follows::
 
     MAIN {
-        io::writeln("Hello, world!");
+        outln("Hello, world!");
     }
+
+Influence
+---------
+
+Mill takes ideas from many languages, in no particular order:
+
+- Clojure: dynamic variables, protocols.
+- D: contracts, exceptions.
+- Eiffel: contracts, CQS.
+- Elixir: pipelines.
+- F#: type system.
+- Go: concurrency, control structures, I/O.
+- Haskell: monad syntax.
+- Perl: control structures, special variables.
+- Scala: pattern matching.
+- Spec#: contracts.
 
 Implementation
 --------------
@@ -31,4 +38,4 @@ The compiler is written in Perl and the VM is written in C++.
 Contributing
 ------------
 
-Like to contribute? Comment on one of the GitHub issues!
+Like to contribute? Comment on one of the GitHub issues or create a new one!

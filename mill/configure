@@ -4,6 +4,8 @@ import os
 import subprocess
 import sys; sys.path.append('tools')
 
+ENABLE_JIT = '--no-jit' not in sys.argv
+
 from ninja_syntax import Writer
 
 def llvm_config(*args):
@@ -23,16 +25,17 @@ w.variable('cxxflags', (os.environ.get('CXXFLAGS', '') + '''
     -isystem ~/Catch/include
     -isystem ~/nonius/include
     -isystem ~/baka/include
-    -isystem ''' + llvm_config('--includedir') + '''
+    ''' + (' -isystem ' + llvm_config('--includedir') if ENABLE_JIT else '') + '''
     -D__STDC_LIMIT_MACROS
     -D__STDC_CONSTANT_MACROS
+    -DMILL_ENABLE_JIT=''' + str(int(ENABLE_JIT)) + '''
     -fcolor-diagnostics
     -g
 ''').replace('\n', ' '))
 w.variable('ldflags', ('''
     -stdlib=libc++
-    -L ''' + llvm_config('--libdir') + '''
-    ''' + llvm_config('--libs', 'all', '--system-libs') + '''
+    ''' + (' -L ' + llvm_config('--libdir') if ENABLE_JIT else '') + '''
+    ''' + (llvm_config('--libs', 'all', '--system-libs') if ENABLE_JIT else '') + '''
     -lboost_system-mt
     -lboost_thread-mt
 ''').replace('\n', ' '))
