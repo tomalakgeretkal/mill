@@ -6,10 +6,10 @@ millidea - Ideas for Mill that still have to be refined
 
 =over
 
-=item C<else> on C<for> and C<while> loops in case they didn't run at least
+=item * C<else> on C<for> and C<while> loops in case they didn't run at least
 once.
 
-=item Multiple variable declarations at once for parameters and C<let>
+=item * Multiple variable declarations at once for parameters and C<let>
 bindings. For example:
 
     proc f(x $y: String) {
