@@ -23,4 +23,6 @@ bindings. For example:
     $y += 1
     check x != $y
 
+=back
+
 =cut
