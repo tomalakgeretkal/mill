@@ -2,7 +2,6 @@ package Millc::Lex;
 use Exporter 'import';
 use List::Util 'min';
 use Modern::Perl;
-use Pod::Simple::Checker;
 
 our @EXPORT_OK = qw(lex);
 
