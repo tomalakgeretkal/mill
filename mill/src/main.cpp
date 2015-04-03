@@ -30,7 +30,6 @@ int main(int argc, char const** argv) {
     disassemble(object, std::cout);
 
     VM vm;
-    vm.loadObject(object);
 
     std::mutex coutMutex;
     vm.setGlobal("std::io::writeln", make<Subroutine>([&] (VM&, std::size_t, Value** argv) -> boost::intrusive_ptr<Value> {
@@ -48,6 +47,8 @@ int main(int argc, char const** argv) {
         auto& b = dynamic_cast<Boolean&>(*argv[1]);
         return make<Boolean>(a.value == b.value);
     }));
+
+    vm.loadObject(object);
 
     vm.call(vm.global("main::MAIN").get(), 0, nullptr).get();
 

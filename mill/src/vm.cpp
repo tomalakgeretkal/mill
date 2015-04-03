@@ -54,6 +54,10 @@ void mill::VM::loadObject(Object const& object) {
             }
 #endif
         });
+        if (object.strings[subroutine.name] == "LOAD") {
+            // TODO: Return future instead of blocking.
+            call(subroutineGlobal.get(), 0, nullptr).get();
+        }
     }
 }
 
