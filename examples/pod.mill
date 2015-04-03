@@ -1,0 +1,18 @@
+use std::io;
+
+=pod
+
+Greets the given entity.
+
+=cut
+
+proc greet(entity: String) {
+    if true == true {
+        io::writeln("Hello, " ~ entity ~ "!");
+    };
+}
+
+MAIN {
+    greet("world");
+    greet("rightfold");
+}

@@ -2,6 +2,7 @@ package Millc::Lex;
 use Exporter 'import';
 use List::Util 'min';
 use Modern::Perl;
+use Pod::Simple::Checker;
 
 our @EXPORT_OK = qw(lex);
 
@@ -39,7 +40,7 @@ sub lex {
     my $code = shift;
     my @tokens;
     token: while ($code ne '') {
-        my $space = qr/[ \n]|#(\((?:(?-1)|.)*?\))|#.*?\n/s;
+        my $space = qr/=[a-z].*?\n=cut|[ \n]|#(\((?:(?-1)|.)*?\))|#.*?\n/s;
         $code =~ s/^$space+//s;
         for (@patterns) {
             my ($pattern, $type, $value) = @$_;
