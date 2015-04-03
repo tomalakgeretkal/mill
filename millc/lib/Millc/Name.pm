@@ -22,6 +22,11 @@ sub resolve {
             module => ['std', 'always'],
             member => 'infix-',
         },
+        'infix==' => {
+            type => 'module_member_symbol',
+            module => ['std', 'always'],
+            member => 'infix==',
+        },
         'String' => {
             type => 'module_member_symbol',
             module => ['std', 'always'],

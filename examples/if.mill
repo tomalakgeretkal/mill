@@ -13,11 +13,11 @@ MAIN {
         io::writeln("2: OK");
     };
 
-    if true {
+    if true == true {
         io::writeln("3: OK");
     };
 
-    if false {
+    if true == false {
         io::writeln("4: WRONG");
     };
 }

@@ -10,11 +10,11 @@ Mill has a syntax.
 
 =head2 Keywords
 
-    _ CHECK LOAD MAIN UNLOAD case catch check default defer do else ensure
-    expose fail false for func given goto if implement in infix invariant is
-    isnt last let match new next old out postfix prefix proc protocol recur
-    redo ref require return select seq struct switch this true try union use
-    while yield
+    _ CHECK LOAD MAIN UNLOAD case catch check cmp default defer do else ensure
+    eq expose fail false for func ge given goto gt if implement in infix
+    invariant is isn't last le let lt match ne new next old out postfix prefix
+    proc protocol recur redo ref require return select seq struct switch this
+    true try union use while yield
 
 =head2 Whitespace
 
@@ -192,6 +192,13 @@ condition is a Boolean.
 =head3 While Expressions
 
 =head3 Check Expressions
+
+A C<check> expression causes a contract violation if a condition is false.
+
+    check false # contract violation
+    check true # ok
+
+See millcont for more information.
 
 =head3 Try and Fail Expressions
 
