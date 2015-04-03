@@ -29,6 +29,10 @@ start with C<#> and extend to the end of the line. Multiline comments start
 with C<#(> and extend to C<)>. The parentheses in multiline comments must
 match. Comments are considered whitespace.
 
+=head2 POD
+
+Mill supports embedding POD.
+
 =head2 Declarations
 
 There are several forms of declarations: use declarations, variable

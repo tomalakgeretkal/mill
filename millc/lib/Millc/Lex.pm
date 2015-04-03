@@ -23,7 +23,8 @@ my @patterns = (
 
     [ qr/false/, 'boolean', sub { 0 } ],
     [ qr/else/, 'else' ],
-    [ qr/MAIN/, 'main' ],
+    [ qr/CHECK/, 'CHECK' ],
+    [ qr/MAIN/, 'MAIN' ],
     [ qr/proc/, 'proc' ],
     [ qr/true/, 'boolean', sub { 1 } ],
     [ qr/if/, 'if' ],
@@ -39,7 +40,7 @@ sub lex {
     my $code = shift;
     my @tokens;
     token: while ($code ne '') {
-        my $space = qr/[ \n]|#(\((?:(?-1)|.)*?\))|#.*?\n/s;
+        my $space = qr/=[a-z].*?\n=cut|[ \n]|#(\((?:(?-1)|.)*?\))|#.*?\n/s;
         $code =~ s/^$space+//s;
         for (@patterns) {
             my ($pattern, $type, $value) = @$_;

@@ -59,7 +59,7 @@ sub one_of {
 }
 
 sub decl {
-    one_of(\&use_decl, \&proc_decl, \&main_decl);
+    one_of(\&use_decl, \&proc_decl, \&check_decl, \&main_decl);
 }
 
 sub use_decl {
@@ -91,8 +91,14 @@ sub proc_decl {
     };
 }
 
+sub check_decl {
+    expect('CHECK');
+    my $body = block_expr();
+    { type => 'check_decl', body => $body };
+}
+
 sub main_decl {
-    expect('main');
+    expect('MAIN');
     my $body = block_expr();
     { type => 'main_decl', body => $body };
 }
