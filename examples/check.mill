@@ -1,0 +1,9 @@
+use std::io;
+
+CHECK {
+    io::writeln("CHECK");
+}
+
+MAIN {
+    io::writeln("MAIN");
+}

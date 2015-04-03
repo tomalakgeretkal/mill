@@ -23,6 +23,7 @@ sub codegen_decl {
     my %codegens = (
         use_decl => \&codegen_use_decl,
         proc_decl => \&codegen_proc_decl,
+        check_decl => \&codegen_check_decl,
         main_decl => \&codegen_main_decl,
     );
     $codegens{$decl->{type}}->($decl);
@@ -46,6 +47,17 @@ sub codegen_proc_decl {
         scalar @{$proc_decl->{params}},
         $body,
     );
+}
+
+sub codegen_check_decl {
+    my $body = '';
+    open my $fh, '>:raw', \$body;
+    local $bytecode_builder = $bytecode_builder_factory->new($fh);
+    codegen_expr(shift->{body});
+    $bytecode_builder->pop();
+    $bytecode_builder->push_unit();
+    $bytecode_builder->return();
+    $object_builder->subroutine('LOAD', 0, $body);
 }
 
 sub codegen_main_decl {

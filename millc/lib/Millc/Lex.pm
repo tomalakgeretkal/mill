@@ -23,7 +23,8 @@ my @patterns = (
 
     [ qr/false/, 'boolean', sub { 0 } ],
     [ qr/else/, 'else' ],
-    [ qr/MAIN/, 'main' ],
+    [ qr/CHECK/, 'CHECK' ],
+    [ qr/MAIN/, 'MAIN' ],
     [ qr/proc/, 'proc' ],
     [ qr/true/, 'boolean', sub { 1 } ],
     [ qr/if/, 'if' ],

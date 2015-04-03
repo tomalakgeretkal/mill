@@ -80,6 +80,10 @@ sub resolve {
             ({ %$ast, body => resolve($ast->{body}, { %$symbols }) });
         },
 
+        check_decl => sub {
+            ({ %$ast, body => resolve($ast->{body}, { %$symbols }) });
+        },
+
         call_expr => sub {
             return {
                 %$ast,
