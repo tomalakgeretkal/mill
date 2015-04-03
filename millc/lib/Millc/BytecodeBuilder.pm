@@ -99,4 +99,9 @@ sub _jump {
     }
 }
 
+sub check {
+    my $fh = shift->{fh};
+    print $fh "\x0C";
+}
+
 1;

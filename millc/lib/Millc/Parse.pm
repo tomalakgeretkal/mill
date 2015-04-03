@@ -104,7 +104,15 @@ sub main_decl {
 }
 
 sub expr {
-    cmp_expr();
+    check_expr();
+}
+
+sub check_expr {
+    one_of(\&cmp_expr, sub {
+        expect('check');
+        my $condition = check_expr();
+        { type => 'check_expr', condition => $condition };
+    });
 }
 
 sub cmp_expr {

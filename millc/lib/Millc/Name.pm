@@ -84,6 +84,13 @@ sub resolve {
             ({ %$ast, body => resolve($ast->{body}, { %$symbols }) });
         },
 
+        check_expr => sub {
+            return {
+                %$ast,
+                condition => resolve($ast->{condition}, { %$symbols }),
+            };
+        },
+
         call_expr => sub {
             return {
                 %$ast,

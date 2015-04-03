@@ -21,9 +21,10 @@ my @patterns = (
 
     [ qr/".*?"/, 'string', sub { substr($_[0], 1, length($_[0]) - 2) } ],
 
+    [ qr/CHECK/, 'CHECK' ],
+    [ qr/check/, 'check' ],
     [ qr/false/, 'boolean', sub { 0 } ],
     [ qr/else/, 'else' ],
-    [ qr/CHECK/, 'CHECK' ],
     [ qr/MAIN/, 'MAIN' ],
     [ qr/proc/, 'proc' ],
     [ qr/true/, 'boolean', sub { 1 } ],

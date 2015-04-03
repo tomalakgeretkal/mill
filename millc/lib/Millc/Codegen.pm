@@ -81,6 +81,7 @@ sub codegen_expr {
         boolean_expr => \&codegen_boolean_expr,
         block_expr => \&codegen_block_expr,
         if_expr => \&codegen_if_expr,
+        check_expr => \&codegen_check_expr,
     );
     $codegens{$expr->{type}}->($expr);
 }
@@ -157,6 +158,12 @@ sub codegen_if_expr {
     codegen_expr($if_expr->{then});
 
     $bytecode_builder->save_label($endif_label);
+}
+
+sub codegen_check_expr {
+    my $check_expr = shift;
+    codegen_expr($check_expr->{condition});
+    $bytecode_builder->check();
 }
 
 sub codegen_stmt {
