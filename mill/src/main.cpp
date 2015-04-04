@@ -28,6 +28,11 @@ int main(int argc, char const** argv) {
         std::cout << arguments_begin->template data<string>().data() << '\n';
         return handle(unit());
     })));
+    globals.emplace("std::always::infix==", handle(subroutine([] (auto arguments_begin, auto) {
+        auto a = (arguments_begin + 0)->template data<bool>();
+        auto b = (arguments_begin + 1)->template data<bool>();
+        return handle(a == b);
+    })));
 
     auto& code = object.subroutines.at(0).body;
     tape<decltype(code.begin())> tape(code.begin(), code.end());
