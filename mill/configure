@@ -21,11 +21,14 @@ def main(argv):
         -Wall -Wextra -Werror -pedantic
         -isystem ~/Catch/include
         -isystem ~/wheels/include
+        -isystem /usr/local/Cellar/icu4c/54.1/include
         -fcolor-diagnostics
         -g
     ''').replace('\n', ' '))
     w.variable('ldflags', ('''
         -stdlib=libc++
+        -L /usr/local/Cellar/icu4c/54.1/lib
+        -licuuc
         -pthread
     ''').replace('\n', ' '))
 

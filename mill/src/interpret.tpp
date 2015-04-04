@@ -49,8 +49,11 @@ namespace mill {
                 return boost::none;
             }
 
-            boost::optional<handle> operator()(push_string_instruction const&) {
-                throw "not implemented";
+            boost::optional<handle> operator()(push_string_instruction const& instruction) {
+                auto string = (*get_string)(instruction.op0);
+                assert(string);
+                push(std::move(*string));
+                return boost::none;
             }
 
             boost::optional<handle> operator()(push_boolean_instruction const& instruction) {

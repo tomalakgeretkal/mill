@@ -1,4 +1,5 @@
 #pragma once
+#include <unicode/unistr.h>
 #include <memory>
 
 namespace mill {
@@ -31,6 +32,14 @@ namespace mill {
 
     // The C++ type of the unit value.
     struct unit { };
+
+    // The C++ type of strings.
+    class string {
+    public:
+
+    private:
+        icu::UnicodeString data;
+    };
 }
 
 #include "data.tpp"

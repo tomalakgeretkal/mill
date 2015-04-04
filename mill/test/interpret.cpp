@@ -75,7 +75,7 @@ TEST_CASE("interpret should jump unconditionally", "[interpret]") {
     REQUIRE_NOTHROW(interpret(code).data<unit>());
 }
 
-TEST_CASE("interpret should load globals", "[interpret]") {
+TEST_CASE("interpret should push globals", "[interpret]") {
     std::vector<unsigned char> code{
         0x01, 0x04, 0x00, 0x00, 0x00,
         0x05,
@@ -93,4 +93,24 @@ TEST_CASE("interpret should load globals", "[interpret]") {
         [] (auto) -> boost::optional<handle> { return boost::none; }
     );
     REQUIRE_NOTHROW(result.data<unit>());
+}
+
+TEST_CASE("interpret should push strings", "[interpret]") {
+    std::vector<unsigned char> code{
+        0x02, 0x04, 0x00, 0x00, 0x00,
+        0x05,
+    };
+    tape<decltype(code.begin())> tape(code.begin(), code.end());
+    std::vector<handle> arguments;
+    auto result = interpret(
+        tape,
+        arguments.begin(),
+        arguments.end(),
+        [] (auto) -> boost::optional<handle> { return boost::none; },
+        [] (auto index) -> boost::optional<handle> {
+            REQUIRE(index == 4);
+            return handle(string());
+        }
+    );
+    REQUIRE_NOTHROW(result.data<string>());
 }
