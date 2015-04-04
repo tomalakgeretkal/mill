@@ -8,10 +8,9 @@
 using namespace mill;
 
 namespace {
-    template<typename Code>
-    handle interpret(Code const& code) {
+    template<typename Code, typename Arguments = std::vector<handle>>
+    handle interpret(Code const& code, Arguments const& arguments = Arguments()) {
         tape<decltype(code.begin())> tape(code.begin(), code.end());
-        std::vector<handle> arguments;
         return interpret(
             tape,
             arguments.begin(),
@@ -33,6 +32,14 @@ TEST_CASE("interpret should push Booleans", "[interpret]") {
     };
     test({0x07, 0x01, 0x05}, true);
     test({0x07, 0x00, 0x05}, false);
+}
+
+TEST_CASE("interpret should push parameters", "[interpret]") {
+    std::vector<unsigned char> code{
+        0x08, 0x01, 0x00, 0x00, 0x00,
+        0x05,
+    };
+    REQUIRE_NOTHROW(interpret(code, {handle(true), handle(unit())}).data<unit>());
 }
 
 TEST_CASE("interpret should pop", "[interpret]") {

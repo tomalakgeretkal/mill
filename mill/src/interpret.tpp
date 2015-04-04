@@ -3,6 +3,7 @@
 #include <cassert>
 #include "data.hpp"
 #include "interpret.hpp"
+#include <iterator>
 #include "tape.hpp"
 #include <utility>
 #include <vector>
@@ -50,17 +51,19 @@ namespace mill {
             }
 
             boost::optional<handle> operator()(push_boolean_instruction const& instruction) {
-                stack.emplace_back(static_cast<bool>(instruction.op0));
+                push(handle(static_cast<bool>(instruction.op0)));
                 return boost::none;
             }
 
             boost::optional<handle> operator()(push_unit_instruction const&) {
-                stack.emplace_back(unit());
+                push(handle(unit()));
                 return boost::none;
             }
 
-            boost::optional<handle> operator()(push_parameter_instruction const&) {
-                throw "not implemented";
+            boost::optional<handle> operator()(push_parameter_instruction const& instruction) {
+                assert(instruction.op0 < std::distance(arguments_begin, arguments_end));
+                push(handle(arguments_begin[instruction.op0]));
+                return boost::none;
             }
 
             boost::optional<handle> operator()(pop_instruction const&) {
@@ -91,6 +94,10 @@ namespace mill {
             }
 
         private:
+            void push(handle value) {
+                stack.push_back(std::move(value));
+            }
+
             handle pop() {
                 assert(!stack.empty());
                 auto result = stack.back();
