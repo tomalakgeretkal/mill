@@ -1,0 +1,85 @@
+#!/usr/bin/env python3
+from glob import glob
+import os
+import subprocess
+import sys; sys.path.append('tools')
+
+from ninja_syntax import Writer
+
+
+def main(argv):
+    w = Writer(open('build.ninja', 'w'))
+
+    w.variable('builddir', 'build')
+
+    w.variable('cxx', os.environ.get('CXX', 'clang++'))
+    w.variable('ld', os.environ.get('LD', '$cxx'))
+
+    w.variable('cxxflags', (os.environ.get('CXXFLAGS', '') + '''
+        -std=c++1y
+        -stdlib=libc++
+        -Wall -Wextra -Werror -pedantic
+        -isystem ~/Catch/include
+        -fcolor-diagnostics
+        -g
+    ''').replace('\n', ' '))
+    w.variable('ldflags', ('''
+        -stdlib=libc++
+        -pthread
+    ''').replace('\n', ' '))
+
+    w.rule('cxx', '$cxx $cxxflags -MMD -MF $out.d -c -o $out $in', depfile='$out.d')
+    w.rule('ld', '$ld $ldflags -o $out $in')
+    w.rule('instruction', 'tools/instruction.pl $in $out')
+
+    w.build(
+        [
+            '$builddir/instruction_type.inc',
+            '$builddir/instruction_decode.inc',
+        ],
+        'instruction',
+        ['src/instruction.txt'],
+    )
+
+    mill_targets = set()
+    test_targets = set()
+
+    for source in glob('src/*.cpp'):
+        target = '$builddir/' + source.replace('.cpp', '.o')
+        mill_targets.add(target)
+
+        if source != 'src/main.cpp':
+            test_targets.add(target)
+
+        w.build(
+            [target],
+            'cxx',
+            [source],
+            implicit=[
+                '$builddir/instruction_type.inc',
+                '$builddir/instruction_decode.inc',
+            ],
+        )
+
+    for source in glob('test/*.cpp'):
+        target = '$builddir/' + source.replace('.cpp', '.o')
+        test_targets.add(target)
+
+        w.build(
+            [target],
+            'cxx',
+            [source],
+            implicit=[
+                '$builddir/instruction_type.inc',
+                '$builddir/instruction_decode.inc',
+            ],
+        )
+
+    if '$builddir/src/main.o' in mill_targets:
+        w.build('$builddir/mill', 'ld', list(mill_targets))
+    w.build('$builddir/mill-test', 'ld', list(test_targets))
+
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))
