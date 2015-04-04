@@ -13,5 +13,8 @@ mill::handle mill::interpret(
     GetGlobal&& get_global,
     GetString&& get_string
 ) {
-    throw interpret_eof();
+    if (code_begin == code_end) {
+        throw interpret_eof();
+    }
+    throw bad_instruction(0);
 }

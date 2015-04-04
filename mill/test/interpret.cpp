@@ -19,3 +19,18 @@ TEST_CASE("interpreter throws interpret_eof", "[interpret]") {
         interpret_eof
     );
 }
+
+TEST_CASE("interpreter throws bad_instruction", "[interpret]") {
+    std::vector<unsigned char> code{ 0xFF };
+    std::vector<handle> arguments;
+
+    REQUIRE_THROWS_AS(
+        interpret(
+            code.begin(), code.end(),
+            arguments.begin(), arguments.end(),
+            [] (auto) { return handle(); },
+            [] (auto) { return handle(); }
+        ),
+        bad_instruction
+    );
+}

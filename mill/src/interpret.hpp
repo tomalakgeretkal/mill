@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include "handle.hpp"
 #include <stdexcept>
 
@@ -7,6 +8,13 @@ namespace mill {
     class interpret_eof : public std::runtime_error {
     public:
         interpret_eof();
+    };
+
+    // Thrown when the interpreter encounters an invalid instruction.
+    class bad_instruction : public std::runtime_error {
+    public:
+        // Construct the exception with the offset of the invalid instruction.
+        explicit bad_instruction(std::size_t offset);
     };
 
     // Interpret bytecode given a range of arguments, a function to retrieve a
