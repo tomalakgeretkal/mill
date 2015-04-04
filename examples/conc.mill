@@ -1,0 +1,10 @@
+use std::conc;
+use std::io;
+
+proc hello() {
+    io::writeln("Hello, world!");
+}
+
+MAIN {
+    conc::spawn(hello);
+}

@@ -6,6 +6,7 @@
 #include "interpret.hpp"
 #include <iostream>
 #include <iterator>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include "tape.hpp"
@@ -18,6 +19,9 @@ using namespace mill;
 
 int main(int argc, char const** argv) {
     assert(argc == 2);
+
+    thread_pool* tp;
+
     std::ifstream object_file_stream(argv[1], std::ios::binary);
     std::vector<unsigned char> object_file(
         (std::istreambuf_iterator<char>(object_file_stream)),
@@ -39,6 +43,17 @@ int main(int argc, char const** argv) {
         auto const& a = (arguments_begin + 0)->template data<string>().data();
         auto const& b = (arguments_begin + 1)->template data<string>().data();
         return handle(string(a + b));
+    })));
+    globals.emplace("std::conc::spawn", handle(subroutine([&] (auto arguments_begin, auto) {
+        auto entry = arguments_begin->template data<subroutine>();
+        auto fiber = std::make_shared<mill::fiber>([entry = std::move(entry)] () mutable {
+            std::vector<handle> arguments;
+            entry(arguments.begin(), arguments.end());
+        });
+        tp->post([fiber = std::move(fiber)] {
+            fiber->resume();
+        });
+        return handle(unit());
     })));
 
     for (auto&& subroutine : object.subroutines) {
@@ -75,8 +90,9 @@ int main(int argc, char const** argv) {
         globals.at("main::MAIN").data<subroutine>()(arguments.begin(), arguments.end());
     });
 
-    thread_pool tp;
-    tp.post([&] { fiber.resume(); });
+    thread_pool tp_;
+    tp = &tp_;
+    tp->post([&] { fiber.resume(); });
 
     return 0;
 }
