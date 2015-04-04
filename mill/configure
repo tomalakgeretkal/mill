@@ -24,12 +24,15 @@ def main(argv):
         -isystem vendor/any_iterator
         -isystem /usr/local/Cellar/icu4c/54.1/include
         -fcolor-diagnostics
+        -DBOOST_SCOPE_EXIT_CONFIG_USE_LAMBDAS
         -g
     ''').replace('\n', ' '))
     w.variable('ldflags', ('''
         -stdlib=libc++
         -L /usr/local/Cellar/icu4c/54.1/lib
         -licuuc
+        -lboost_coroutine-mt
+        -lboost_system-mt
         -pthread
     ''').replace('\n', ' '))
 
