@@ -27,11 +27,7 @@ mill::instruction mill::decode_instruction(CodeIt&& it, CodeIt const end) {
     check(begin != end);
 
     switch (*it++) {
-        case 0x01: {
-            push_global_instruction result;
-            read_int(result.name_index);
-            return result;
-        }
+#include "../build/instruction_decode.inc"
 
         default:
             check(false);

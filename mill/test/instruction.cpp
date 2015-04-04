@@ -24,5 +24,5 @@ TEST_CASE("decode_instruction throws bad_instruction", "[instruction]") {
 TEST_CASE("decode_instruction returns the decoded instruction", "[instruction]") {
     std::vector<unsigned char> code{ 0x01, 0x01, 0x02, 0x03, 0x04 };
     auto instruction = decode_instruction(code.begin(), code.end());
-    REQUIRE(boost::get<push_global_instruction>(instruction).name_index == 0x04030201);
+    REQUIRE(boost::get<push_global_instruction>(instruction).op0 == 0x04030201);
 }

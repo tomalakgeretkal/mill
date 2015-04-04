@@ -5,12 +5,7 @@
 #include <stdexcept>
 
 namespace mill {
-    struct push_global_instruction { std::uint32_t name_index; };
-
-    // An instruction that can be executed by the interpreter.
-    using instruction = boost::variant<
-        push_global_instruction
-    >;
+#include "../build/instruction_type.inc"
 
     // Thrown when the decoder encounters an invalid instruction.
     class bad_instruction : public std::runtime_error {
