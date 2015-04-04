@@ -34,28 +34,37 @@ int main(int argc, char const** argv) {
         return handle(a == b);
     })));
 
-    auto& code = object.subroutines.at(0).body;
-    tape<decltype(code.begin())> tape(code.begin(), code.end());
+    for (auto&& subroutine : object.subroutines) {
+        globals.emplace(
+            object.strings[object.name] + "::" + object.strings[subroutine.name],
+            handle(mill::subroutine([&] (auto arguments_begin, auto arguments_end) {
+                auto& code = subroutine.body;
+                tape<decltype(code.begin())> tape(code.begin(), code.end());
+                return interpret(
+                    tape,
+                    arguments_begin,
+                    arguments_end,
+                    [&] (auto index) -> boost::optional<handle> {
+                        try {
+                            return globals.at(object.strings.at(index));
+                        } catch (std::out_of_range const&) {
+                            return boost::none;
+                        }
+                    },
+                    [&] (auto index) -> boost::optional<handle> {
+                        try {
+                            return handle(string(object.strings.at(index)));
+                        } catch (std::out_of_range const&) {
+                            return boost::none;
+                        }
+                    }
+                );
+            }))
+        );
+    }
+
     std::vector<handle> arguments;
-    interpret(
-        tape,
-        arguments.begin(),
-        arguments.end(),
-        [&] (auto index) -> boost::optional<handle> {
-            try {
-                return globals.at(object.strings.at(index));
-            } catch (std::out_of_range const&) {
-                return boost::none;
-            }
-        },
-        [&] (auto index) -> boost::optional<handle> {
-            try {
-                return handle(string(object.strings.at(index)));
-            } catch (std::out_of_range const&) {
-                return boost::none;
-            }
-        }
-    );
+    globals.at("main::MAIN").data<subroutine>()(arguments.begin(), arguments.end());
 
     return 0;
 }
