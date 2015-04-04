@@ -14,7 +14,6 @@ R mill::memcpy_cast(I input) {
     return result;
 }
 
-// Read exactly n elements from the iterator.
 template<typename It, typename Out>
 void mill::read_exactly(It&& begin, It&& end, std::size_t n, Out out) {
     if (static_cast<std::size_t>(std::distance(begin, end)) < n) {
