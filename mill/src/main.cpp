@@ -1,6 +1,7 @@
 #include <boost/optional.hpp>
 #include <cassert>
 #include "data.hpp"
+#include "fiber.hpp"
 #include <fstream>
 #include "interpret.hpp"
 #include <iostream>
@@ -8,6 +9,7 @@
 #include <stdexcept>
 #include <string>
 #include "tape.hpp"
+#include "thread_pool.hpp"
 #include <unordered_map>
 #include <vector>
 #include "object.hpp"
@@ -68,8 +70,13 @@ int main(int argc, char const** argv) {
         );
     }
 
-    std::vector<handle> arguments;
-    globals.at("main::MAIN").data<subroutine>()(arguments.begin(), arguments.end());
+    fiber fiber([&] {
+        std::vector<handle> arguments;
+        globals.at("main::MAIN").data<subroutine>()(arguments.begin(), arguments.end());
+    });
+
+    thread_pool tp;
+    tp.post([&] { fiber.resume(); });
 
     return 0;
 }
