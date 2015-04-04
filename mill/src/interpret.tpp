@@ -63,7 +63,8 @@ namespace mill {
             }
 
             boost::optional<handle> operator()(pop_instruction const&) {
-                throw "not implemented";
+                pop();
+                return boost::none;
             }
 
             boost::optional<handle> operator()(swap_instruction const&) {

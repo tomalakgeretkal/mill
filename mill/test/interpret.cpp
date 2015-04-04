@@ -34,3 +34,8 @@ TEST_CASE("interpret should push Booleans", "[interpret]") {
     test({0x07, 0x01, 0x05}, true);
     test({0x07, 0x00, 0x05}, false);
 }
+
+TEST_CASE("interpret should pop", "[interpret]") {
+    std::vector<unsigned char> code{0x06, 0x07, 0x01, 0x04, 0x05};
+    REQUIRE_NOTHROW(interpret(code).data<unit>());
+}
