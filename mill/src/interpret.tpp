@@ -62,7 +62,7 @@ namespace mill {
 
             boost::optional<handle> operator()(push_parameter_instruction const& instruction) {
                 assert(instruction.op0 < std::distance(arguments_begin, arguments_end));
-                push(handle(arguments_begin[instruction.op0]));
+                push(arguments_begin[instruction.op0]);
                 return boost::none;
             }
 
