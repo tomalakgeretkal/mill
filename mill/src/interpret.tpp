@@ -48,8 +48,8 @@ namespace mill {
                 throw "not implemented";
             }
 
-            boost::optional<handle> operator()(push_boolean_instruction const&) {
-                stack.emplace_back();
+            boost::optional<handle> operator()(push_boolean_instruction const& instruction) {
+                stack.emplace_back(static_cast<bool>(instruction.op0));
                 return boost::none;
             }
 
