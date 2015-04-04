@@ -119,14 +119,18 @@ TEST_CASE("interpret should push strings", "[interpret]") {
 TEST_CASE("interpret should call subroutines", "[interpret]") {
     auto called = false;
     auto callee = handle(subroutine([&] (auto arguments_begin, auto arguments_end) {
-        REQUIRE(std::distance(arguments_begin, arguments_end) == 0);
+        REQUIRE(std::distance(arguments_begin, arguments_end) == 2);
+        REQUIRE((arguments_begin + 0)->template data<bool>() == true);
+        REQUIRE((arguments_begin + 1)->template data<bool>() == false);
         called = true;
         return handle(unit());
     }));
 
     std::vector<unsigned char> code{
         0x01, 0x00, 0x00, 0x00, 0x00,
-        0x03, 0x00, 0x00, 0x00, 0x00,
+        0x07, 0x01,
+        0x07, 0x00,
+        0x03, 0x02, 0x00, 0x00, 0x00,
         0x05,
     };
     tape<decltype(code.begin())> tape(code.begin(), code.end());

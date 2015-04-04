@@ -2,6 +2,7 @@
 #include <boost/variant.hpp>
 #include <cassert>
 #include "data.hpp"
+#include <deque>
 #include "interpret.hpp"
 #include <iterator>
 #include "tape.hpp"
@@ -83,8 +84,11 @@ namespace mill {
                 return boost::none;
             }
 
-            boost::optional<handle> operator()(call_instruction const&) {
-                std::vector<handle> arguments;
+            boost::optional<handle> operator()(call_instruction const& instruction) {
+                std::deque<handle> arguments;
+                for (decltype(instruction.op0) i = 0; i < instruction.op0; ++i) {
+                    arguments.push_front(pop());
+                }
                 auto callee = pop().template data<subroutine>();
                 push(callee(arguments.begin(), arguments.end()));
                 return boost::none;
