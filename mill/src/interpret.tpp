@@ -100,7 +100,7 @@ namespace mill {
 
             handle pop() {
                 assert(!stack.empty());
-                auto result = stack.back();
+                auto result = std::move(stack.back());
                 stack.pop_back();
                 return result;
             }
