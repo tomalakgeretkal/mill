@@ -89,8 +89,9 @@ namespace mill {
                 throw "not implemented";
             }
 
-            boost::optional<handle> operator()(unconditional_jump_instruction const&) {
-                throw "not implemented";
+            boost::optional<handle> operator()(unconditional_jump_instruction const& instruction) {
+                tape.seek(instruction.op0);
+                return boost::none;
             }
 
         private:
