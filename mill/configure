@@ -4,57 +4,90 @@ import os
 import subprocess
 import sys; sys.path.append('tools')
 
-ENABLE_JIT = '--no-jit' not in sys.argv
-
 from ninja_syntax import Writer
 
-def llvm_config(*args):
-    return subprocess.check_output(['llvm-config'] + list(args)).decode()
 
-w = Writer(open('build.ninja', 'w'))
+def main(argv):
+    w = Writer(open('build.ninja', 'w'))
 
-w.variable('builddir', 'build')
+    w.variable('builddir', 'build')
 
-w.variable('cxx', os.environ.get('CXX', 'clang++'))
-w.variable('ld', '$cxx')
+    w.variable('cxx', os.environ.get('CXX', 'clang++'))
+    w.variable('ld', os.environ.get('LD', '$cxx'))
 
-w.variable('cxxflags', (os.environ.get('CXXFLAGS', '') + '''
-    -std=c++1y
-    -stdlib=libc++
-    -Wall -Wextra -Werror -pedantic
-    -isystem ~/Catch/include
-    -isystem ~/nonius/include
-    -isystem ~/baka/include
-    ''' + (' -isystem ' + llvm_config('--includedir') if ENABLE_JIT else '') + '''
-    -D__STDC_LIMIT_MACROS
-    -D__STDC_CONSTANT_MACROS
-    -DMILL_ENABLE_JIT=''' + str(int(ENABLE_JIT)) + '''
-    -fcolor-diagnostics
-    -g
-''').replace('\n', ' '))
-w.variable('ldflags', ('''
-    -stdlib=libc++
-    ''' + (' -L ' + llvm_config('--libdir') if ENABLE_JIT else '') + '''
-    ''' + (llvm_config('--libs', 'all', '--system-libs') if ENABLE_JIT else '') + '''
-    -lboost_system-mt
-    -lboost_thread-mt
-    -pthread
-''').replace('\n', ' '))
+    w.variable('cxxflags', (os.environ.get('CXXFLAGS', '') + '''
+        -std=c++1y
+        -stdlib=libc++
+        -Wall -Wextra -Werror -pedantic
+        -isystem ~/Catch/include
+        -isystem ~/wheels/include
+        -isystem vendor/any_iterator
+        -isystem /usr/local/Cellar/icu4c/54.1/include
+        -fcolor-diagnostics
+        -DBOOST_SCOPE_EXIT_CONFIG_USE_LAMBDAS
+        -g
+    ''').replace('\n', ' '))
+    w.variable('ldflags', ('''
+        -stdlib=libc++
+        -L /usr/local/Cellar/icu4c/54.1/lib
+        -licuuc
+        -lboost_coroutine-mt
+        -lboost_system-mt
+        -pthread
+    ''').replace('\n', ' '))
 
-w.rule('cxx', '$cxx $cxxflags -MMD -MF $out.d -c -o $out $in', depfile='$out.d')
-w.rule('ld', '$ld $ldflags -o $out $in')
-w.rule('instructions', 'tools/instructions.awk $in > $out')
+    w.rule('cxx', '$cxx $cxxflags -MMD -MF $out.d -c -o $out $in', depfile='$out.d')
+    w.rule('ld', '$ld $ldflags -o $out $in')
+    w.rule('instruction', 'tools/instruction.pl $in $out')
 
-w.build('$builddir/instructions.hpp', 'instructions', ['src/instructions.txt'])
+    w.build(
+        [
+            '$builddir/instruction_type.inc',
+            '$builddir/instruction_decode.inc',
+        ],
+        'instruction',
+        ['src/instruction.txt'],
+    )
 
-targets = {'src': [], 'test': []}
-for kind, source_file in [('src', f) for f in glob('src/*.cpp')] + [('test', f) for f in glob('test/*.cpp')]:
-    target = '$builddir/' + source_file.replace('.cpp', '.o')
-    targets[kind].append(target)
-    if kind == 'src' and source_file != 'src/main.cpp':
-        targets['test'].append(target)
-    w.build(target, 'cxx', [source_file], implicit=['$builddir/instructions.hpp'])
+    mill_targets = set()
+    test_targets = set()
 
-for target in targets:
-    if targets[target]:
-        w.build('$builddir/' + target + '.out', 'ld', targets[target])
+    for source in glob('src/*.cpp'):
+        target = '$builddir/' + source.replace('.cpp', '.o')
+        mill_targets.add(target)
+
+        if source != 'src/main.cpp':
+            test_targets.add(target)
+
+        w.build(
+            [target],
+            'cxx',
+            [source],
+            implicit=[
+                '$builddir/instruction_type.inc',
+                '$builddir/instruction_decode.inc',
+            ],
+        )
+
+    for source in glob('test/*.cpp'):
+        target = '$builddir/' + source.replace('.cpp', '.o')
+        test_targets.add(target)
+
+        w.build(
+            [target],
+            'cxx',
+            [source],
+            implicit=[
+                '$builddir/instruction_type.inc',
+                '$builddir/instruction_decode.inc',
+            ],
+        )
+
+    if '$builddir/src/main.o' in mill_targets:
+        w.build('$builddir/mill', 'ld', list(mill_targets))
+    w.build('$builddir/mill-test', 'ld', list(test_targets))
+
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))

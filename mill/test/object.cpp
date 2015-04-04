@@ -1,13 +1,11 @@
 #include "../src/object.hpp"
-#include <baka/io/pipe.hpp>
 #include <catch.hpp>
-#include <cstddef>
 #include <string>
 #include <vector>
 
-TEST_CASE("readObject", "[object_file]") {
-    auto pair = baka::io::pipe();
+using namespace mill;
 
+TEST_CASE("read_object should work", "[object]") {
     std::vector<unsigned char> data{
         0xDE, 0xAD, 0xBE, 0xEF,
         0x00, 0x00, 0x00, 0x00, 0x01, 0x00,
@@ -34,15 +32,14 @@ TEST_CASE("readObject", "[object_file]") {
         0x04,
         0x05,
     };
-    pair.second.write((char*)data.data(), (char*)data.data() + data.size());
 
-    auto object = mill::readObject(pair.first);
+    auto object = read_object(data.begin(), data.end());
     REQUIRE(object.strings == (std::vector<std::string>{"std::io", "std::io::writeln", "Hello, world!", "MAIN", "main"}));
     REQUIRE(object.name == 4);
     REQUIRE(object.dependencies == (std::vector<std::size_t>{0}));
 
     auto main = object.subroutines.at(0);
     REQUIRE(main.name == 3);
-    REQUIRE(main.parameterCount == 0);
+    REQUIRE(main.parameter_count == 0);
     REQUIRE(main.body == std::vector<unsigned char>(data.begin() + 106, data.end()));
 }
