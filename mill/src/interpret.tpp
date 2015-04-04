@@ -54,7 +54,8 @@ namespace mill {
             }
 
             boost::optional<handle> operator()(push_unit_instruction const&) {
-                throw "not implemented";
+                stack.emplace_back(unit());
+                return boost::none;
             }
 
             boost::optional<handle> operator()(push_parameter_instruction const&) {

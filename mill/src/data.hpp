@@ -28,6 +28,9 @@ namespace mill {
 
         std::shared_ptr<base> ptr;
     };
+
+    // The C++ type of the unit value.
+    struct unit { };
 }
 
 #include "data.tpp"
