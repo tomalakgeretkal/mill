@@ -84,7 +84,10 @@ namespace mill {
             }
 
             boost::optional<handle> operator()(call_instruction const&) {
-                throw "not implemented";
+                std::vector<handle> arguments;
+                auto callee = pop().template data<subroutine>();
+                push(callee(arguments.begin(), arguments.end()));
+                return boost::none;
             }
 
             boost::optional<handle> operator()(return_instruction const&) {

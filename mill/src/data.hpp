@@ -1,4 +1,7 @@
 #pragma once
+#include <any_iterator.hpp>
+#include <functional>
+#include <iterator>
 #include <unicode/unistr.h>
 #include <memory>
 
@@ -39,6 +42,20 @@ namespace mill {
 
     private:
         icu::UnicodeString data;
+    };
+
+    // The C++ type of subroutines.
+    class subroutine {
+    public:
+        template<typename F>
+        explicit subroutine(F implementation);
+
+        template<typename ArgumentIt>
+        handle operator()(ArgumentIt arguments_begin, ArgumentIt arguments_end);
+
+    private:
+        using argument_iterator = IteratorTypeErasure::any_iterator<handle, std::random_access_iterator_tag>;
+        std::function<handle(argument_iterator, argument_iterator)> implementation;
     };
 }
 

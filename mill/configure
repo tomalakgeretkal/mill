@@ -21,6 +21,7 @@ def main(argv):
         -Wall -Wextra -Werror -pedantic
         -isystem ~/Catch/include
         -isystem ~/wheels/include
+        -isystem vendor/any_iterator
         -isystem /usr/local/Cellar/icu4c/54.1/include
         -fcolor-diagnostics
         -g

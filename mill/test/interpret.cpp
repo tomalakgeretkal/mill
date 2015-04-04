@@ -3,6 +3,7 @@
 #include "../src/tape.hpp"
 #include <boost/optional.hpp>
 #include <catch.hpp>
+#include <iterator>
 #include <vector>
 
 using namespace mill;
@@ -113,4 +114,30 @@ TEST_CASE("interpret should push strings", "[interpret]") {
         }
     );
     REQUIRE_NOTHROW(result.data<string>());
+}
+
+TEST_CASE("interpret should call subroutines", "[interpret]") {
+    auto called = false;
+    auto callee = handle(subroutine([&] (auto arguments_begin, auto arguments_end) {
+        REQUIRE(std::distance(arguments_begin, arguments_end) == 0);
+        called = true;
+        return handle(unit());
+    }));
+
+    std::vector<unsigned char> code{
+        0x01, 0x00, 0x00, 0x00, 0x00,
+        0x03, 0x00, 0x00, 0x00, 0x00,
+        0x05,
+    };
+    tape<decltype(code.begin())> tape(code.begin(), code.end());
+    std::vector<handle> arguments;
+    auto result = interpret(
+        tape,
+        arguments.begin(),
+        arguments.end(),
+        [&] (auto) -> boost::optional<handle> { return callee; },
+        [] (auto) -> boost::optional<handle> { return boost::none; }
+    );
+    REQUIRE_NOTHROW(result.data<unit>());
+    REQUIRE(called);
 }
