@@ -47,9 +47,15 @@ namespace mill {
     // The C++ type of subroutines.
     class subroutine {
     public:
+        // Construct the subroutine with the given implementation, which must
+        // be a callable that takes a pair of iterators to the arguments and
+        // return a handle.
         template<typename F>
         explicit subroutine(F implementation);
 
+        // Call the implementation of the subroutine.
+        //
+        // - arguments_begin and arguments_end must be iterators to handles.
         template<typename ArgumentIt>
         handle operator()(ArgumentIt arguments_begin, ArgumentIt arguments_end);
 
