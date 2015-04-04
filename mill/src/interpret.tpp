@@ -42,8 +42,11 @@ namespace mill {
                 }
             }
 
-            boost::optional<handle> operator()(push_global_instruction const&) {
-                throw "not implemented";
+            boost::optional<handle> operator()(push_global_instruction const& instruction) {
+                auto global = (*get_global)(instruction.op0);
+                assert(global);
+                push(std::move(*global));
+                return boost::none;
             }
 
             boost::optional<handle> operator()(push_string_instruction const&) {

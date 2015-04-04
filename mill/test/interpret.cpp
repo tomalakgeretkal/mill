@@ -15,8 +15,8 @@ namespace {
             tape,
             arguments.begin(),
             arguments.end(),
-            [] (auto) { return boost::none; },
-            [] (auto) { return boost::none; }
+            [] (auto) -> boost::optional<handle> { return boost::none; },
+            [] (auto) -> boost::optional<handle> { return boost::none; }
         );
     }
 }
@@ -73,4 +73,24 @@ TEST_CASE("interpret should jump unconditionally", "[interpret]") {
         0x05,
     };
     REQUIRE_NOTHROW(interpret(code).data<unit>());
+}
+
+TEST_CASE("interpret should load globals", "[interpret]") {
+    std::vector<unsigned char> code{
+        0x01, 0x04, 0x00, 0x00, 0x00,
+        0x05,
+    };
+    tape<decltype(code.begin())> tape(code.begin(), code.end());
+    std::vector<handle> arguments;
+    auto result = interpret(
+        tape,
+        arguments.begin(),
+        arguments.end(),
+        [] (auto index) -> boost::optional<handle> {
+            REQUIRE(index == 4);
+            return handle(unit());
+        },
+        [] (auto) -> boost::optional<handle> { return boost::none; }
+    );
+    REQUIRE_NOTHROW(result.data<unit>());
 }
