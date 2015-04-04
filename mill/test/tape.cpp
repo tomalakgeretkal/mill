@@ -28,3 +28,11 @@ TEST_CASE("tape::read reads subsequent instructions", "[tape]") {
     REQUIRE(tape.read() == instruction(pop_instruction()));
     REQUIRE(tape.read() == instruction(swap_instruction()));
 }
+
+TEST_CASE("tape::seek works", "[tape]") {
+    std::vector<unsigned char> code{0x04, 0x09, 0x01, 0x01, 0x02, 0x03, 0x04};
+    tape<decltype(code.begin())> tape(code.begin(), code.end());
+    REQUIRE(tape.read() == instruction(pop_instruction()));
+    tape.seek(2);
+    REQUIRE(tape.read() == instruction(push_global_instruction(0x04030201)));
+}

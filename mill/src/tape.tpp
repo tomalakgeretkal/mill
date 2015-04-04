@@ -1,5 +1,7 @@
+#include <cassert>
 #include <cstddef>
 #include "instruction.hpp"
+#include <iterator>
 #include "tape.hpp"
 
 template<typename CodeIt>
@@ -13,6 +15,6 @@ mill::instruction mill::tape<CodeIt>::read() {
 
 template<typename CodeIt>
 void mill::tape<CodeIt>::seek(std::size_t offset) {
-    (void)offset;
-    throw 2;
+    assert(offset < static_cast<std::size_t>(std::distance(begin, end)));
+    it = begin + offset;
 }
