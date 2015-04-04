@@ -2,6 +2,7 @@
 #include <boost/variant.hpp>
 #include <cstddef>
 #include <cstdint>
+#include <ostream>
 #include <stdexcept>
 
 namespace mill {
@@ -19,7 +20,7 @@ namespace mill {
     //
     // - begin and end must be random access iterators to unsigned chars.
     template<typename CodeIt>
-    instruction decode_instruction(CodeIt&& begin, CodeIt end);
+    instruction decode_instruction(CodeIt& begin, CodeIt const end);
 }
 
 #include "instruction.tpp"

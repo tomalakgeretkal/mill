@@ -7,7 +7,7 @@
 #include <iterator>
 
 template<typename CodeIt>
-mill::instruction mill::decode_instruction(CodeIt&& it, CodeIt const end) {
+mill::instruction mill::decode_instruction(CodeIt& it, CodeIt const end) {
     auto const begin = it;
 
     auto check = [&] (auto condition) {
