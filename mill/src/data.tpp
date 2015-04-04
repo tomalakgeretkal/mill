@@ -1,3 +1,4 @@
+#include <cassert>
 #include "data.hpp"
 #include <utility>
 
@@ -7,6 +8,7 @@ mill::handle::handle(T value)
 
 template<typename T>
 T& mill::handle::data() const {
+    assert(ptr);
     return dynamic_cast<derived<T>&>(*ptr).value;
 }
 
