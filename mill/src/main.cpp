@@ -33,6 +33,11 @@ int main(int argc, char const** argv) {
         auto b = (arguments_begin + 1)->template data<bool>();
         return handle(a == b);
     })));
+    globals.emplace("std::always::infix~", handle(subroutine([] (auto arguments_begin, auto) {
+        auto const& a = (arguments_begin + 0)->template data<string>().data();
+        auto const& b = (arguments_begin + 1)->template data<string>().data();
+        return handle(string(a + b));
+    })));
 
     for (auto&& subroutine : object.subroutines) {
         globals.emplace(
