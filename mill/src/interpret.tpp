@@ -85,8 +85,11 @@ namespace mill {
                 return pop();
             }
 
-            boost::optional<handle> operator()(conditional_jump_instruction const&) {
-                throw "not implemented";
+            boost::optional<handle> operator()(conditional_jump_instruction const& instruction) {
+                if (pop().template data<bool>()) {
+                    tape.seek(instruction.op0);
+                }
+                return boost::none;
             }
 
             boost::optional<handle> operator()(unconditional_jump_instruction const& instruction) {
