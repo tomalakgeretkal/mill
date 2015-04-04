@@ -20,6 +20,7 @@ def main(argv):
         -stdlib=libc++
         -Wall -Wextra -Werror -pedantic
         -isystem ~/Catch/include
+        -isystem ~/wheels/include
         -fcolor-diagnostics
         -g
     ''').replace('\n', ' '))

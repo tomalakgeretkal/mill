@@ -6,6 +6,7 @@
 #include "tape.hpp"
 #include <utility>
 #include <vector>
+#include <wheels/adl/swap.h++>
 
 namespace mill {
     namespace detail {
@@ -68,7 +69,9 @@ namespace mill {
             }
 
             boost::optional<handle> operator()(swap_instruction const&) {
-                throw "not implemented";
+                assert(stack.size() >= 2);
+                wheels::adl::swap(stack[stack.size() - 1], stack[stack.size() - 2]);
+                return boost::none;
             }
 
             boost::optional<handle> operator()(call_instruction const&) {
