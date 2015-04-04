@@ -15,6 +15,8 @@ namespace mill {
         // Resume the fiber until it is paused. If the fiber is not paused,
         // this function will wait until it is and then resume the fiber
         // immediately.
+        //
+        // Precondition: no fiber is running on the current thread.
         void resume();
 
         // Pause the current fiber.

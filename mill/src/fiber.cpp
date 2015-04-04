@@ -8,6 +8,7 @@ namespace {
 }
 
 void mill::fiber::resume() {
+    assert(!current_fiber);
     std::lock_guard<decltype(mutex)> lock(mutex);
     current_fiber = this;
     BOOST_SCOPE_EXIT() {
