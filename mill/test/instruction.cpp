@@ -14,4 +14,8 @@ TEST_CASE("instruction throws bad_instruction", "[interpret]") {
     test({ });
     test({ 0x00 });
     test({ 0xFF });
+    test({ 0x01 });
+    test({ 0x01, 0x00 });
+    test({ 0x01, 0x00, 0x00 });
+    test({ 0x01, 0x00, 0x00, 0x00 });
 }
