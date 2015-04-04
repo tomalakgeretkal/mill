@@ -24,7 +24,7 @@ namespace mill {
     //
     // - begin and end must be random access iterators to unsigned chars.
     template<typename CodeIt>
-    instruction decode_instruction(CodeIt begin, CodeIt end);
+    instruction decode_instruction(CodeIt&& begin, CodeIt end);
 }
 
 #include "instruction.tpp"
