@@ -2,8 +2,8 @@
 #include <any_iterator.hpp>
 #include <functional>
 #include <iterator>
-#include <unicode/unistr.h>
 #include <memory>
+#include <string>
 
 namespace mill {
     // A handle to a Mill value.
@@ -39,9 +39,12 @@ namespace mill {
     // The C++ type of strings.
     class string {
     public:
+        explicit string(std::string data);
+
+        std::string const& data() const;
 
     private:
-        icu::UnicodeString data;
+        std::string data_;
     };
 
     // The C++ type of subroutines.

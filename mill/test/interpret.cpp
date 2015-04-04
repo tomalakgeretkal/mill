@@ -110,10 +110,10 @@ TEST_CASE("interpret should push strings", "[interpret]") {
         [] (auto) -> boost::optional<handle> { return boost::none; },
         [] (auto index) -> boost::optional<handle> {
             REQUIRE(index == 4);
-            return handle(string());
+            return handle(string("foo"));
         }
     );
-    REQUIRE_NOTHROW(result.data<string>());
+    REQUIRE(result.data<string>().data() == "foo");
 }
 
 TEST_CASE("interpret should call subroutines", "[interpret]") {
