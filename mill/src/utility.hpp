@@ -29,8 +29,7 @@ namespace mill {
     //
     // Usage example:
     //
-    //     call<handle> call{impl, arguments_begin++->template data<Args>()...};
-    //     return call.result;
+    //     return call<handle>{impl, xs()...}.result;
     //
     // - R is the type of the result.
     template<typename R>

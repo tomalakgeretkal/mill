@@ -37,8 +37,7 @@ mill::handle mill::make_subroutine(F impl) {
             if (static_cast<std::size_t>(argument_count) != sizeof...(Args)) {
                 throw "invalid number of arguments passed";
             }
-            call<handle> call{impl, arguments_begin++->template data<Args>()...};
-            return call.result;
+            return call<handle>{impl, arguments_begin++->template data<Args>()...}.result;
         }
     ));
 }
