@@ -56,6 +56,20 @@ A structure type defines a set of fields.
 
 A lens will be generated for each field.
 
+=head4 Wrapper Types
+
+A wrapper type wraps a value of another type, and can optionally specify
+preconditions which are checked upon construction.
+
+    wrapper Hostname(String) {
+        check this ~= [rx()|^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$]
+    }
+
+    let a = Hostname("example.com") # ok
+    let c = Hostname("example%com") # precondition violation
+    let b = Hostname("") # precondition violation
+    outln(String(a)) # convert back to String
+
 =head3 Union Types
 
 A union type represents one of many possible structures.
