@@ -3,6 +3,8 @@ use std::io;
 
 proc hello() {
     io::writeln("Hello, world!");
+    conc::sleep();
+    io::writeln("Bye, world!");
 }
 
 MAIN {
