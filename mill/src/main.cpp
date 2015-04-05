@@ -65,7 +65,7 @@ int main(int argc, char const** argv) {
     auto set_global = [&] (std::string const& name, handle value) {
         globals.emplace(name, std::move(value));
     };
-    if (std::strchr(argv[1], '/')) {
+    if (std::strchr(argv[1], '/') || std::strchr(argv[1], '.')) {
         load_object(argv[1], get_global, set_global);
     } else {
         load_object(argv[1], search_path, get_global, set_global);
