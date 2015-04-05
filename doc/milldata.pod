@@ -55,7 +55,7 @@ A structure type defines a set of fields.
         name: String
         birthday: LocalDate
 
-        invariant !empty?(name)
+        invariant !empty?(this.name)
     }
 
 A lens will be generated for each field.
