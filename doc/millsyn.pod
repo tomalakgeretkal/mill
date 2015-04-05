@@ -14,7 +14,7 @@ Mill has a syntax.
     eq expose fail false for func ge given goto gt if implement in infix
     invariant is isn't last le let lt match ne new next old out postfix prefix
     proc protocol recur redo ref require return select seq struct switch this
-    true try union use while yield
+    true try union use while wrapper yield
 
 =head2 Whitespace
 
