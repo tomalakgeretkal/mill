@@ -61,7 +61,8 @@ A lens will be generated for each field.
 =head3 Wrapper Types
 
 A wrapper type wraps a value of another type, and can optionally specify
-invariants which are checked upon construction and extraction.
+invariants which are checked upon construction and extraction in debug mode
+(see L<millcont> for more information about contracts).
 
     let hostname-regex = [rx()|…]
     wrapper Hostname(String) {
@@ -69,8 +70,8 @@ invariants which are checked upon construction and extraction.
     }
 
     let a = Hostname("example.com") # ok
-    let b = Hostname("example%com") # precondition violation
-    let c = Hostname("") # precondition violation
+    let b = Hostname("example%com") # invariant violation
+    let c = Hostname("") # invariant violation
     outln(String(a)) # extract string
 
 =head3 Union Types
