@@ -21,3 +21,14 @@ mill::thread_pool::~thread_pool() {
     work.reset();
     threads.join_all();
 }
+
+void mill::thread_pool::resume(fiber& fiber) {
+    assert(fibers.count(&fiber));
+    io_service.post([&] {
+        if (fiber.resume() == fiber::status::finished) {
+            fibers.erase(&fiber);
+            // FIXME: Shitty std::unique_ptr doesn't work as map key so fix this memory leak.
+            delete &fiber;
+        }
+    });
+}

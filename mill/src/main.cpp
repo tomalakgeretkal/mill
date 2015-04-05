@@ -1,4 +1,6 @@
 #include <boost/algorithm/string.hpp>
+#include <boost/asio.hpp>
+#include <boost/optional.hpp>
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
@@ -9,6 +11,7 @@
 #include <stdexcept>
 #include <string>
 #include <tbb/concurrent_unordered_map.h>
+#include <thread>
 #include "thread_pool.hpp"
 #include <utility>
 #include <vector>
@@ -44,14 +47,28 @@ int main(int argc, char const** argv) {
         load_object(argv[1], search_path, get_global, set_global);
     }
 
-    auto main_fiber = make_fiber([&] {
-        std::vector<handle> arguments;
-        globals.at("main::MAIN").data<subroutine>()(arguments.begin(), arguments.end());
+    boost::asio::io_service io_service;
+    boost::optional<boost::asio::io_service::work> work(io_service);
+
+    std::thread io_thread([&] {
+        io_service.run();
     });
 
-    thread_pool thread_pool;
-    load_builtins(thread_pool, get_global, set_global);
-    thread_pool.post([main_fiber = std::move(main_fiber)] { main_fiber->resume(); });
+    {
+        thread_pool thread_pool;
+
+        load_builtins(thread_pool, io_service, get_global, set_global);
+
+        auto& main_fiber = thread_pool.spawn([&] {
+            std::vector<handle> arguments;
+            globals.at("main::MAIN").data<subroutine>()(arguments.begin(), arguments.end());
+        });
+
+        thread_pool.resume(main_fiber);
+    }
+
+    work.reset();
+    io_thread.join();
 
     return 0;
 }

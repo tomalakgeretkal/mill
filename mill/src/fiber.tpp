@@ -4,7 +4,8 @@
 
 template<typename F>
 mill::fiber::fiber(F entry)
-    : pull(body(entry)) { }
+    : pull(body(entry))
+    , fiber_status(status::not_finished) { }
 
 template<typename F>
 auto mill::fiber::body(F entry) {
@@ -12,13 +13,6 @@ auto mill::fiber::body(F entry) {
         push = &sink;
         sink();
         entry();
-        self.reset();
+        fiber_status = status::finished;
     };
-}
-
-template<typename F>
-std::shared_ptr<mill::fiber> mill::make_fiber(F entry) {
-    std::shared_ptr<fiber> shared_ptr(new fiber(std::move(entry)));
-    shared_ptr->self = shared_ptr;
-    return shared_ptr;
 }

@@ -1,14 +1,13 @@
 #include <boost/scope_exit.hpp>
 #include <cassert>
 #include "fiber.hpp"
-#include <memory>
 #include <mutex>
 
 namespace {
     __thread mill::fiber* volatile current_fiber = nullptr;
 }
 
-void mill::fiber::resume() {
+mill::fiber::status mill::fiber::resume() {
     assert(!current_fiber);
     std::lock_guard<decltype(mutex)> lock(mutex);
     current_fiber = this;
@@ -16,6 +15,7 @@ void mill::fiber::resume() {
         current_fiber = nullptr;
     };
     pull();
+    return fiber_status;
 }
 
 void mill::fiber::pause() {
@@ -23,7 +23,7 @@ void mill::fiber::pause() {
     (*current_fiber->push)();
 }
 
-std::shared_ptr<mill::fiber> mill::fiber::current() {
+mill::fiber& mill::fiber::current() {
     assert(current_fiber);
-    return current_fiber->self;
+    return *current_fiber;
 }
