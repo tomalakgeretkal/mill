@@ -35,6 +35,7 @@ def main(argv):
         -lboost_filesystem-mt
         -lboost_system-mt
         -lboost_thread-mt
+        -ltbb
         -pthread
     ''').replace('\n', ' '))
 
