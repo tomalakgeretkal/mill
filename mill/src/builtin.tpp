@@ -5,6 +5,7 @@
 #include <memory>
 #include "thread_pool.hpp"
 #include <utility>
+#include "utility.hpp"
 #include <vector>
 
 template<typename GlobalGetter, typename GlobalSetter>
@@ -15,25 +16,20 @@ void mill::load_builtins(
 ) {
     (void)get_global;
 
-    set_global("std::io::writeln", handle(subroutine([] (auto arguments_begin, auto) {
-        std::cout << arguments_begin->template data<string>().data() << '\n';
+    set_global("std::io::writeln", make_subroutine<string>([] (string const& string) {
+        std::cout << string.data() << '\n';
         return handle(unit());
-    })));
+    }));
 
-    set_global("std::always::infix==", handle(subroutine([] (auto arguments_begin, auto) {
-        auto a = (arguments_begin + 0)->template data<bool>();
-        auto b = (arguments_begin + 1)->template data<bool>();
+    set_global("std::always::infix==", make_subroutine<bool, bool>([] (bool a, bool b) {
         return handle(a == b);
-    })));
+    }));
 
-    set_global("std::always::infix~", handle(subroutine([] (auto arguments_begin, auto) {
-        auto const& a = (arguments_begin + 0)->template data<string>().data();
-        auto const& b = (arguments_begin + 1)->template data<string>().data();
-        return handle(string(a + b));
-    })));
+    set_global("std::always::infix~", make_subroutine<string, string>([] (string const& a, string const& b) {
+        return handle(string(a.data() + b.data()));
+    }));
 
-    set_global("std::conc::spawn", handle(subroutine([&thread_pool] (auto arguments_begin, auto) {
-        auto entry = arguments_begin->template data<subroutine>();
+    set_global("std::conc::spawn", make_subroutine<subroutine>([&thread_pool] (subroutine const& entry) {
         auto fiber = std::make_shared<mill::fiber>([entry = std::move(entry)] () mutable {
             std::vector<handle> arguments;
             entry(arguments.begin(), arguments.end());
@@ -42,5 +38,5 @@ void mill::load_builtins(
             fiber->resume();
         });
         return handle(unit());
-    })));
+    }));
 }

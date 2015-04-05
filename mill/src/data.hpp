@@ -66,6 +66,10 @@ namespace mill {
         using argument_iterator = IteratorTypeErasure::any_iterator<handle, std::random_access_iterator_tag>;
         std::function<handle(argument_iterator, argument_iterator)> implementation;
     };
+
+    // Construct a subroutine given a C++ callable.
+    template<typename... Args, typename F>
+    handle make_subroutine(F impl);
 }
 
 #include "data.tpp"

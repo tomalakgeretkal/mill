@@ -4,6 +4,7 @@
 #include <cstring>
 #include <iterator>
 #include <type_traits>
+#include <utility>
 #include "utility.hpp"
 
 template<typename R, typename I>
@@ -34,3 +35,8 @@ T mill::read_integer(It&& begin, It&& end, byte_order bo) {
     }
     return memcpy_cast<T>(data);
 }
+
+template<typename R>
+template<typename F, typename... Args>
+mill::call<R>::call(F&& f, Args&&... args)
+    : result(std::forward<F>(f)(std::forward<Args>(args)...)) { }
