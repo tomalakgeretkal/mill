@@ -31,9 +31,10 @@ def main(argv):
         -stdlib=libc++
         -L /usr/local/Cellar/icu4c/54.1/lib
         -licuuc
-        -lboost_thread-mt
         -lboost_coroutine-mt
+        -lboost_filesystem-mt
         -lboost_system-mt
+        -lboost_thread-mt
         -pthread
     ''').replace('\n', ' '))
 

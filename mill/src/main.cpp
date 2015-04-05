@@ -1,19 +1,19 @@
+#include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
 #include <cassert>
+#include <cstdlib>
+#include <cstring>
 #include "data.hpp"
 #include "fiber.hpp"
-#include <fstream>
-#include "interpret.hpp"
 #include <iostream>
-#include <iterator>
 #include <memory>
+#include "object.hpp"
 #include <stdexcept>
 #include <string>
-#include "tape.hpp"
 #include "thread_pool.hpp"
 #include <unordered_map>
+#include <utility>
 #include <vector>
-#include "object.hpp"
 
 using namespace mill;
 
@@ -21,13 +21,6 @@ int main(int argc, char const** argv) {
     assert(argc == 2);
 
     thread_pool* tp;
-
-    std::ifstream object_file_stream(argv[1], std::ios::binary);
-    std::vector<unsigned char> object_file(
-        (std::istreambuf_iterator<char>(object_file_stream)),
-        std::istreambuf_iterator<char>()
-    );
-    auto object = read_object(object_file.begin(), object_file.end());
 
     std::unordered_map<std::string, handle> globals;
     globals.emplace("std::io::writeln", handle(subroutine([] (auto arguments_begin, auto) {
@@ -56,33 +49,26 @@ int main(int argc, char const** argv) {
         return handle(unit());
     })));
 
-    for (auto&& subroutine : object.subroutines) {
-        globals.emplace(
-            object.strings[object.name] + "::" + object.strings[subroutine.name],
-            handle(mill::subroutine([&] (auto arguments_begin, auto arguments_end) {
-                auto& code = subroutine.body;
-                tape<decltype(code.begin())> tape(code.begin(), code.end());
-                return interpret(
-                    tape,
-                    arguments_begin,
-                    arguments_end,
-                    [&] (auto index) -> boost::optional<handle> {
-                        try {
-                            return globals.at(object.strings.at(index));
-                        } catch (std::out_of_range const&) {
-                            return boost::none;
-                        }
-                    },
-                    [&] (auto index) -> boost::optional<handle> {
-                        try {
-                            return handle(string(object.strings.at(index)));
-                        } catch (std::out_of_range const&) {
-                            return boost::none;
-                        }
-                    }
-                );
-            }))
-        );
+    search_path search_path;
+    auto search_path_string = std::getenv("MILLPATH");
+    if (search_path_string) {
+        boost::algorithm::split(search_path, search_path_string, boost::is_any_of(":"));
+    }
+
+    auto get_global = [&] (std::string const& name) -> boost::optional<handle> {
+        try {
+            return globals.at(name);
+        } catch (std::out_of_range const&) {
+            return boost::none;
+        }
+    };
+    auto set_global = [&] (std::string const& name, handle value) {
+        globals.emplace(name, std::move(value));
+    };
+    if (std::strchr(argv[1], '/')) {
+        load_object(argv[1], get_global, set_global);
+    } else {
+        load_object(argv[1], search_path, get_global, set_global);
     }
 
     fiber fiber([&] {
