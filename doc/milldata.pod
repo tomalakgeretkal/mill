@@ -56,7 +56,7 @@ A structure type defines a set of fields.
 
 A lens will be generated for each field.
 
-=head4 Wrapper Types
+=head3 Wrapper Types
 
 A wrapper type wraps a value of another type, and can optionally specify
 preconditions which are checked upon construction.
