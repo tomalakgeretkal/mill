@@ -10,6 +10,7 @@
 #include <string>
 #include <tbb/concurrent_unordered_map.h>
 #include "thread_pool.hpp"
+#include <utility>
 #include <vector>
 
 using namespace mill;
@@ -43,14 +44,14 @@ int main(int argc, char const** argv) {
         load_object(argv[1], search_path, get_global, set_global);
     }
 
-    fiber main_fiber([&] {
+    auto main_fiber = make_fiber([&] {
         std::vector<handle> arguments;
         globals.at("main::MAIN").data<subroutine>()(arguments.begin(), arguments.end());
     });
 
     thread_pool thread_pool;
     load_builtins(thread_pool, get_global, set_global);
-    thread_pool.post([&] { main_fiber.resume(); });
+    thread_pool.post([main_fiber = std::move(main_fiber)] { main_fiber->resume(); });
 
     return 0;
 }

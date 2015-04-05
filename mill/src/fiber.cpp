@@ -1,6 +1,7 @@
 #include <boost/scope_exit.hpp>
 #include <cassert>
 #include "fiber.hpp"
+#include <memory>
 #include <mutex>
 
 namespace {
@@ -22,7 +23,7 @@ void mill::fiber::pause() {
     (*current_fiber->push)();
 }
 
-mill::fiber& mill::fiber::current() {
+std::shared_ptr<mill::fiber> mill::fiber::current() {
     assert(current_fiber);
-    return *current_fiber;
+    return current_fiber->self;
 }

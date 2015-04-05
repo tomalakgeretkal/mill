@@ -2,7 +2,6 @@
 #include "data.hpp"
 #include "fiber.hpp"
 #include <iostream>
-#include <memory>
 #include "thread_pool.hpp"
 #include <utility>
 #include "utility.hpp"
@@ -16,8 +15,11 @@ void mill::load_builtins(
 ) {
     (void)get_global;
 
-    set_global("std::io::writeln", make_subroutine<string>([] (string const& string) {
+    set_global("std::io::writeln", make_subroutine<string>([&thread_pool] (string const& string) {
         std::cout << string.data() << '\n';
+        auto current = fiber::current();
+        thread_pool.post([current = std::move(current)] { current->resume(); });
+        fiber::pause();
         return handle(unit());
     }));
 
@@ -30,7 +32,7 @@ void mill::load_builtins(
     }));
 
     set_global("std::conc::spawn", make_subroutine<subroutine>([&thread_pool] (subroutine const& entry) {
-        auto fiber = std::make_shared<mill::fiber>([entry = std::move(entry)] () mutable {
+        auto fiber = make_fiber([entry = std::move(entry)] () mutable {
             std::vector<handle> arguments;
             entry(arguments.begin(), arguments.end());
         });
