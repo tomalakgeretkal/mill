@@ -16,7 +16,7 @@ def main(argv):
     w.variable('ld', os.environ.get('LD', '$cxx'))
 
     w.variable('cxxflags', (os.environ.get('CXXFLAGS', '') + '''
-        -std=c++1y
+        -std=c++1z
         -stdlib=libc++
         -Wall -Wextra -Werror -pedantic
         -isystem ~/Catch/include
