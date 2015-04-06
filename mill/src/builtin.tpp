@@ -19,7 +19,7 @@ void mill::load_builtins(
 ) {
     (void)get_global;
 
-#include "builtin/always.inc"
-#include "builtin/conc.inc"
-#include "builtin/io.inc"
+#include "builtin/always.ipp"
+#include "builtin/conc.ipp"
+#include "builtin/io.ipp"
 }

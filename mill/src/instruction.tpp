@@ -27,7 +27,7 @@ mill::instruction mill::decode_instruction(CodeIt& it, CodeIt const end) {
     check(begin != end);
 
     switch (*it++) {
-#include "../build/instruction_decode.inc"
+#include "../build/instruction_decode.ipp"
 
         default:
             check(false);

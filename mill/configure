@@ -45,8 +45,8 @@ def main(argv):
 
     w.build(
         [
-            '$builddir/instruction_type.inc',
-            '$builddir/instruction_decode.inc',
+            '$builddir/instruction_type.ipp',
+            '$builddir/instruction_decode.ipp',
         ],
         'instruction',
         ['src/instruction.txt'],
@@ -67,8 +67,8 @@ def main(argv):
             'cxx',
             [source],
             implicit=[
-                '$builddir/instruction_type.inc',
-                '$builddir/instruction_decode.inc',
+                '$builddir/instruction_type.ipp',
+                '$builddir/instruction_decode.ipp',
             ],
         )
 
@@ -81,8 +81,8 @@ def main(argv):
             'cxx',
             [source],
             implicit=[
-                '$builddir/instruction_type.inc',
-                '$builddir/instruction_decode.inc',
+                '$builddir/instruction_type.ipp',
+                '$builddir/instruction_decode.ipp',
             ],
         )
 

@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 namespace mill {
-#include "../build/instruction_type.inc"
+#include "../build/instruction_type.ipp"
 
     // Thrown when the decoder encounters an invalid instruction.
     class bad_instruction : public std::runtime_error {
