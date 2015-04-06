@@ -19,54 +19,7 @@ void mill::load_builtins(
 ) {
     (void)get_global;
 
-    set_global("std::io::writeln", make_subroutine<string>([&thread_pool, &io_service] (string const& mill_string) {
-        boost::asio::posix::stream_descriptor out(io_service, ::dup(STDOUT_FILENO));
-        auto string = mill_string.data() + '\n';
-
-        auto& current_fiber = fiber::current();
-        boost::asio::async_write(
-            out,
-            boost::asio::buffer(string.data(), string.size()),
-            [&] (boost::system::error_code ec, std::size_t bytes_transfered) {
-                (void)ec; // TODO: Handle error!
-                (void)bytes_transfered; // TODO: Retry!
-                thread_pool.resume(current_fiber);
-            }
-        );
-
-        fiber::pause();
-
-        return handle(unit());
-    }));
-
-    set_global("std::conc::sleep", make_subroutine([&thread_pool, &io_service] {
-        boost::asio::deadline_timer timer(io_service);
-        timer.expires_from_now(boost::posix_time::milliseconds(1000));
-
-        auto& current_fiber = fiber::current();
-        timer.async_wait([&] (boost::system::error_code ec) {
-            (void)ec; // TODO: Handle error!
-            thread_pool.resume(current_fiber);
-        });
-        fiber::pause();
-
-        return handle(unit());
-    }));
-
-    set_global("std::always::infix==", make_subroutine<bool, bool>([] (bool a, bool b) {
-        return handle(a == b);
-    }));
-
-    set_global("std::always::infix~", make_subroutine<string, string>([] (string const& a, string const& b) {
-        return handle(string(a.data() + b.data()));
-    }));
-
-    set_global("std::conc::spawn", make_subroutine<subroutine>([&thread_pool] (subroutine const& entry) {
-        auto& fiber = thread_pool.spawn([entry = std::move(entry)] () mutable {
-            std::vector<handle> arguments;
-            entry(arguments.begin(), arguments.end());
-        });
-        thread_pool.resume(fiber);
-        return handle(unit());
-    }));
+#include "builtin/always.inc"
+#include "builtin/conc.inc"
+#include "builtin/io.inc"
 }
